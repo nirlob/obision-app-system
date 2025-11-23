@@ -17,6 +17,8 @@ export class GpuComponent {
   private usageHistory: number[] = [];
   private readonly maxHistoryPoints = 60;
   private hasNvidiaGpu: boolean = false;
+  private gpuType: 'nvidia' | 'amd' | 'intel' | 'unknown' = 'unknown';
+  private gpuCount: number = 0;
 
   constructor() {
     this.utils = UtilsService.instance;
@@ -57,8 +59,8 @@ export class GpuComponent {
       this.drawLineChart(cr, width, height);
     });
     
-    // Check for NVIDIA GPU
-    this.checkNvidiaGpu();
+    // Detect GPU type and count
+    this.detectGPU();
     
     // Load static GPU info
     this.loadGpuInfo();
@@ -73,50 +75,154 @@ export class GpuComponent {
     });
   }
 
-  private checkNvidiaGpu(): void {
+  private detectGPU(): void {
+    // Try NVIDIA first
     try {
-      const [stdout] = this.utils.executeCommand('which', ['nvidia-smi']);
-      this.hasNvidiaGpu = stdout.trim().length > 0;
-    } catch (e) {
-      this.hasNvidiaGpu = false;
+      const [whichOut] = this.utils.executeCommand('which', ['nvidia-smi']);
+      if (whichOut.trim()) {
+        try {
+          const [testOut] = this.utils.executeCommand('nvidia-smi', ['-L']);
+          if (testOut.trim()) {
+            this.hasNvidiaGpu = true;
+            this.gpuType = 'nvidia';
+            this.gpuCount = testOut.trim().split('\n').filter(l => l.trim()).length;
+            console.log(`NVIDIA GPU detected: ${this.gpuCount} GPU(s)`);
+            return;
+          }
+        } catch (testError) {
+          console.error('nvidia-smi test failed:', testError);
+        }
+      }
+    } catch (error) {
+      console.log('nvidia-smi not found');
+    }
+
+    // Try AMD
+    try {
+      const [lspciOut] = this.utils.executeCommand('lspci', []);
+      const amdLines = lspciOut.split('\n').filter(line => 
+        (line.includes('VGA') || line.includes('3D')) && 
+        (line.includes('AMD') || line.includes('ATI') || line.includes('Radeon'))
+      );
+      if (amdLines.length > 0) {
+        this.gpuType = 'amd';
+        this.gpuCount = amdLines.length;
+        console.log(`AMD GPU detected: ${this.gpuCount} GPU(s)`);
+        return;
+      }
+    } catch (error) {
+      console.log('Error checking for AMD GPU:', error);
+    }
+
+    // Try Intel
+    try {
+      const [lspciOut] = this.utils.executeCommand('lspci', []);
+      const intelLines = lspciOut.split('\n').filter(line => 
+        (line.includes('VGA') || line.includes('3D')) && line.includes('Intel')
+      );
+      if (intelLines.length > 0) {
+        this.gpuType = 'intel';
+        this.gpuCount = intelLines.length;
+        console.log(`Intel GPU detected: ${this.gpuCount} GPU(s)`);
+        return;
+      }
+    } catch (error) {
+      console.log('Error checking for Intel GPU:', error);
+    }
+
+    // Fallback: count all VGA devices
+    try {
+      const [lspciOut] = this.utils.executeCommand('lspci', []);
+      const gpuLines = lspciOut.split('\n').filter(line => 
+        line.includes('VGA') || line.includes('3D')
+      );
+      this.gpuCount = gpuLines.length;
+      if (this.gpuCount > 0) {
+        console.log(`Generic GPU(s) detected: ${this.gpuCount}`);
+      }
+    } catch (error) {
+      console.log('Error detecting GPUs:', error);
     }
   }
 
   private loadGpuInfo(): void {
     try {
       if (this.hasNvidiaGpu) {
-        // Get GPU name
+        // NVIDIA GPU
         const [nameOut] = this.utils.executeCommand('nvidia-smi', ['--query-gpu=name', '--format=csv,noheader']);
         if (nameOut.trim()) {
-          this.gpuNameValue.set_label(nameOut.trim());
+          const gpuNames = nameOut.trim().split('\n');
+          const label = this.gpuCount > 1 ? `${gpuNames[0]} (${this.gpuCount}x)` : gpuNames[0];
+          this.gpuNameValue.set_label(label);
         }
         
-        // Get driver version
         const [driverOut] = this.utils.executeCommand('nvidia-smi', ['--query-gpu=driver_version', '--format=csv,noheader']);
         if (driverOut.trim()) {
-          this.gpuDriverValue.set_label(driverOut.trim());
+          this.gpuDriverValue.set_label(driverOut.trim().split('\n')[0]);
         }
         
-        // Get total memory
         const [memoryOut] = this.utils.executeCommand('nvidia-smi', ['--query-gpu=memory.total', '--format=csv,noheader']);
         if (memoryOut.trim()) {
-          this.gpuMemoryTotalValue.set_label(memoryOut.trim());
+          this.gpuMemoryTotalValue.set_label(memoryOut.trim().split('\n')[0]);
         }
-      } else {
-        // Try lspci for GPU info
+      } else if (this.gpuType === 'amd') {
+        // AMD GPU
         const [lspciOut] = this.utils.executeCommand('lspci', []);
-        const gpuLine = lspciOut.split('\n').find(line => 
-          line.toLowerCase().includes('vga') || 
-          line.toLowerCase().includes('3d') ||
-          line.toLowerCase().includes('display')
+        const amdLines = lspciOut.split('\n').filter(line => 
+          (line.includes('VGA') || line.includes('3D')) && 
+          (line.includes('AMD') || line.includes('ATI') || line.includes('Radeon'))
         );
-        
-        if (gpuLine) {
-          const gpuName = gpuLine.split(':').slice(2).join(':').trim();
-          this.gpuNameValue.set_label(gpuName);
+        if (amdLines.length > 0) {
+          const parts = amdLines[0].split(':');
+          const gpuName = parts.length > 2 ? parts.slice(2).join(':').trim() : 'AMD GPU';
+          const label = this.gpuCount > 1 ? `${gpuName} (${this.gpuCount}x)` : gpuName;
+          this.gpuNameValue.set_label(label);
         }
         
-        this.gpuDriverValue.set_label('N/A (nvidia-smi not available)');
+        try {
+          const [modInfoOut] = this.utils.executeCommand('modinfo', ['amdgpu']);
+          const versionLine = modInfoOut.split('\n').find(line => line.includes('version:'));
+          this.gpuDriverValue.set_label(versionLine ? versionLine.split(':')[1].trim() : 'amdgpu');
+        } catch {
+          this.gpuDriverValue.set_label('amdgpu');
+        }
+        this.gpuMemoryTotalValue.set_label('N/A (use radeontop)');
+      } else if (this.gpuType === 'intel') {
+        // Intel GPU
+        const [lspciOut] = this.utils.executeCommand('lspci', []);
+        const intelLines = lspciOut.split('\n').filter(line => 
+          (line.includes('VGA') || line.includes('3D')) && line.includes('Intel')
+        );
+        if (intelLines.length > 0) {
+          const parts = intelLines[0].split(':');
+          const gpuName = parts.length > 2 ? parts.slice(2).join(':').trim() : 'Intel GPU';
+          const label = this.gpuCount > 1 ? `${gpuName} (${this.gpuCount}x)` : gpuName;
+          this.gpuNameValue.set_label(label);
+        }
+        
+        try {
+          const [modInfoOut] = this.utils.executeCommand('modinfo', ['i915']);
+          const versionLine = modInfoOut.split('\n').find(line => line.includes('version:'));
+          this.gpuDriverValue.set_label(versionLine ? versionLine.split(':')[1].trim() : 'i915');
+        } catch {
+          this.gpuDriverValue.set_label('i915');
+        }
+        this.gpuMemoryTotalValue.set_label('Shared System RAM');
+      } else {
+        // Unknown/Generic GPU
+        const [lspciOut] = this.utils.executeCommand('lspci', []);
+        const gpuLines = lspciOut.split('\n').filter(line => 
+          line.includes('VGA') || line.includes('3D')
+        );
+        if (gpuLines.length > 0) {
+          const parts = gpuLines[0].split(':');
+          const gpuName = parts.length > 2 ? parts.slice(2).join(':').trim() : 'Unknown GPU';
+          const label = this.gpuCount > 1 ? `${gpuName} (${this.gpuCount}x)` : gpuName;
+          this.gpuNameValue.set_label(label);
+        } else {
+          this.gpuNameValue.set_label('No GPU detected');
+        }
+        this.gpuDriverValue.set_label('N/A');
         this.gpuMemoryTotalValue.set_label('N/A');
       }
     } catch (error) {
@@ -128,40 +234,106 @@ export class GpuComponent {
   private updateData(): void {
     try {
       if (this.hasNvidiaGpu) {
-        // Get GPU utilization
-        const [utilizationOut] = this.utils.executeCommand('nvidia-smi', 
-          ['--query-gpu=utilization.gpu', '--format=csv,noheader,nounits']);
-        const utilization = parseFloat(utilizationOut.trim());
-        
-        if (!isNaN(utilization)) {
-          this.gpuUsageValue.set_label(`${utilization.toFixed(1)}%`);
+        try {
+          // Get GPU utilization (average if multiple GPUs)
+          const [utilizationOut] = this.utils.executeCommand('nvidia-smi', 
+            ['--query-gpu=utilization.gpu', '--format=csv,noheader,nounits']);
+          const utilizationValues = utilizationOut.trim().split('\n').map(v => parseFloat(v));
+          const avgUtilization = utilizationValues.reduce((a, b) => a + b, 0) / utilizationValues.length;
           
-          // Update history
-          this.usageHistory.push(utilization);
-          if (this.usageHistory.length > this.maxHistoryPoints) {
-            this.usageHistory.shift();
+          if (!isNaN(avgUtilization)) {
+            const label = this.gpuCount > 1 ? 
+              `${avgUtilization.toFixed(1)}% (avg of ${this.gpuCount})` : 
+              `${avgUtilization.toFixed(1)}%`;
+            this.gpuUsageValue.set_label(label);
+            
+            this.usageHistory.push(avgUtilization);
+            if (this.usageHistory.length > this.maxHistoryPoints) {
+              this.usageHistory.shift();
+            }
           }
+          
+          // Get memory used (sum if multiple GPUs)
+          const [memoryUsedOut] = this.utils.executeCommand('nvidia-smi', 
+            ['--query-gpu=memory.used', '--format=csv,noheader']);
+          if (memoryUsedOut.trim()) {
+            const memValues = memoryUsedOut.trim().split('\n');
+            this.gpuMemoryUsedValue.set_label(memValues[0]);
+          }
+          
+          // Get temperature (average if multiple GPUs)
+          const [tempOut] = this.utils.executeCommand('nvidia-smi', 
+            ['--query-gpu=temperature.gpu', '--format=csv,noheader,nounits']);
+          if (tempOut.trim()) {
+            const temps = tempOut.trim().split('\n').map(v => parseFloat(v));
+            const avgTemp = temps.reduce((a, b) => a + b, 0) / temps.length;
+            const label = this.gpuCount > 1 ? 
+              `${avgTemp.toFixed(0)}°C (avg)` : 
+              `${temps[0]}°C`;
+            this.gpuTemperatureValue.set_label(label);
+          }
+          
+          // Get power usage (sum if multiple GPUs)
+          const [powerOut] = this.utils.executeCommand('nvidia-smi', 
+            ['--query-gpu=power.draw', '--format=csv,noheader']);
+          if (powerOut.trim()) {
+            const powers = powerOut.trim().split('\n');
+            this.gpuPowerValue.set_label(powers[0]);
+          }
+        } catch (cmdError) {
+          console.error('nvidia-smi command failed, disabling GPU monitoring:', cmdError);
+          this.hasNvidiaGpu = false;
+          this.gpuUsageValue.set_label('N/A (nvidia-smi error)');
+          this.gpuMemoryUsedValue.set_label('N/A');
+          this.gpuTemperatureValue.set_label('N/A');
+          this.gpuPowerValue.set_label('N/A');
+        }
+      } else if (this.gpuType === 'amd') {
+        // AMD GPUs: Try to read from sysfs
+        try {
+          const [drmOut] = this.utils.executeCommand('ls', ['/sys/class/drm']);
+          const cards = drmOut.split('\n').filter(line => line.startsWith('card'));
+          
+          if (cards.length > 0) {
+            // Try to read GPU usage from first card
+            try {
+              const [usageOut] = this.utils.executeCommand('cat', 
+                [`/sys/class/drm/${cards[0]}/device/gpu_busy_percent`]);
+              const usage = parseFloat(usageOut.trim());
+              if (!isNaN(usage)) {
+                this.gpuUsageValue.set_label(`${usage.toFixed(1)}%`);
+                this.usageHistory.push(usage);
+                if (this.usageHistory.length > this.maxHistoryPoints) {
+                  this.usageHistory.shift();
+                }
+              } else {
+                throw new Error('Invalid usage value');
+              }
+            } catch {
+              this.gpuUsageValue.set_label('N/A (install radeontop)');
+              this.usageHistory.push(0);
+              if (this.usageHistory.length > this.maxHistoryPoints) {
+                this.usageHistory.shift();
+              }
+            }
+          }
+        } catch {
+          this.gpuUsageValue.set_label('N/A');
         }
         
-        // Get memory used
-        const [memoryUsedOut] = this.utils.executeCommand('nvidia-smi', 
-          ['--query-gpu=memory.used', '--format=csv,noheader']);
-        if (memoryUsedOut.trim()) {
-          this.gpuMemoryUsedValue.set_label(memoryUsedOut.trim());
-        }
+        this.gpuMemoryUsedValue.set_label('N/A');
+        this.gpuTemperatureValue.set_label('N/A');
+        this.gpuPowerValue.set_label('N/A');
+      } else if (this.gpuType === 'intel') {
+        // Intel GPUs: Limited monitoring available
+        this.gpuUsageValue.set_label('N/A (intel_gpu_top required)');
+        this.gpuMemoryUsedValue.set_label('N/A');
+        this.gpuTemperatureValue.set_label('N/A');
+        this.gpuPowerValue.set_label('N/A');
         
-        // Get temperature
-        const [tempOut] = this.utils.executeCommand('nvidia-smi', 
-          ['--query-gpu=temperature.gpu', '--format=csv,noheader,nounits']);
-        if (tempOut.trim()) {
-          this.gpuTemperatureValue.set_label(`${tempOut.trim()}°C`);
-        }
-        
-        // Get power usage
-        const [powerOut] = this.utils.executeCommand('nvidia-smi', 
-          ['--query-gpu=power.draw', '--format=csv,noheader']);
-        if (powerOut.trim()) {
-          this.gpuPowerValue.set_label(powerOut.trim());
+        this.usageHistory.push(0);
+        if (this.usageHistory.length > this.maxHistoryPoints) {
+          this.usageHistory.shift();
         }
       } else {
         this.gpuUsageValue.set_label('N/A');
@@ -169,7 +341,6 @@ export class GpuComponent {
         this.gpuTemperatureValue.set_label('N/A');
         this.gpuPowerValue.set_label('N/A');
         
-        // Keep updating history with 0 for chart continuity
         this.usageHistory.push(0);
         if (this.usageHistory.length > this.maxHistoryPoints) {
           this.usageHistory.shift();
@@ -180,6 +351,11 @@ export class GpuComponent {
       this.gpuChart.queue_draw();
     } catch (error) {
       console.error('Error updating GPU data:', error);
+      this.usageHistory.push(0);
+      if (this.usageHistory.length > this.maxHistoryPoints) {
+        this.usageHistory.shift();
+      }
+      this.gpuChart.queue_draw();
     }
   }
 

@@ -9,6 +9,7 @@ import { SystemInfoComponent } from './components/system-info';
 import { ResourcesComponent } from './components/resources';
 import { ProcessesComponent } from './components/processes';
 import { ServicesComponent } from './components/services';
+import { DriversComponent } from './components/drivers';
 
 class ObisionStatusApplication {
   private application: Adw.Application;
@@ -115,6 +116,7 @@ class ObisionStatusApplication {
     const menuButton4 = builder.get_object('menu_option_4') as Gtk.Button;
     const menuButton5 = builder.get_object('menu_option_5') as Gtk.Button;
     const menuButton6 = builder.get_object('menu_option_6') as Gtk.Button;
+    const menuButton7 = builder.get_object('menu_option_7') as Gtk.Button;
 
     // Setup navigation
     menuButton0.connect('clicked', () => {
@@ -137,6 +139,9 @@ class ObisionStatusApplication {
     });
     menuButton6.connect('clicked', () => {
       this.onNavigationItemSelected(6, mainContent);
+    });
+    menuButton7.connect('clicked', () => {
+      this.onNavigationItemSelected(7, mainContent);
     });
 
     // Show first view by default
@@ -177,6 +182,9 @@ class ObisionStatusApplication {
       case 6: // Services
         this.showServices(contentBox);
         break;
+      case 7: // Drivers
+        this.showDrivers(contentBox);
+        break;
     }
   }
 
@@ -212,6 +220,11 @@ class ObisionStatusApplication {
 
   private showServices(contentBox: Gtk.Box): void {
     const component = new ServicesComponent();
+    contentBox.append(component.getWidget());
+  }
+
+  private showDrivers(contentBox: Gtk.Box): void {
+    const component = new DriversComponent();
     contentBox.append(component.getWidget());
   }
 
