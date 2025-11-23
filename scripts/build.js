@@ -213,6 +213,38 @@ if (fs.existsSync(gpuComponentFile)) {
     combinedContent += gpuContent + '\n';
 }
 
+// Add Memory component
+const memoryComponentFile = path.join(BUILD_DIR, 'components', 'memory.js');
+if (fs.existsSync(memoryComponentFile)) {
+    console.log('📋 Adding MemoryComponent...');
+    let memoryContent = fs.readFileSync(memoryComponentFile, 'utf8');
+
+    const classStartIndex = memoryContent.indexOf('class MemoryComponent {');
+    if (classStartIndex !== -1) {
+        memoryContent = memoryContent.substring(classStartIndex);
+    }
+
+    memoryContent = cleanJSContent(memoryContent)
+        .replace(/utils_service_1\./g, '');
+    combinedContent += memoryContent + '\n';
+}
+
+// Add Network component
+const networkComponentFile = path.join(BUILD_DIR, 'components', 'network.js');
+if (fs.existsSync(networkComponentFile)) {
+    console.log('📋 Adding NetworkComponent...');
+    let networkContent = fs.readFileSync(networkComponentFile, 'utf8');
+
+    const classStartIndex = networkContent.indexOf('class NetworkComponent {');
+    if (classStartIndex !== -1) {
+        networkContent = networkContent.substring(classStartIndex);
+    }
+
+    networkContent = cleanJSContent(networkContent)
+        .replace(/utils_service_1\./g, '');
+    combinedContent += networkContent + '\n';
+}
+
 // Add SystemInfo component
 const systemInfoComponentFile = path.join(BUILD_DIR, 'components', 'system-info.js');
 if (fs.existsSync(systemInfoComponentFile)) {
@@ -332,6 +364,8 @@ if (fs.existsSync(mainJsFile)) {
         .replace(/resume_1\./g, '')
         .replace(/cpu_1\./g, '')
         .replace(/gpu_1\./g, '')
+        .replace(/memory_1\./g, '')
+        .replace(/network_1\./g, '')
         .replace(/system_info_1\./g, '')
         .replace(/resources_1\./g, '')
         .replace(/processes_1\./g, '')

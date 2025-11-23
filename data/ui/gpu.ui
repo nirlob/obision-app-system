@@ -61,186 +61,102 @@
                 <property name="halign">start</property>
                 <property name="hexpand">true</property>
                 <style>
-                  <class name="title-2"/>
+                  <class name="title-3"/>
                 </style>
               </object>
             </child>
             
-            <!-- GPU Name -->
             <child>
-              <object class="GtkBox">
-                <property name="orientation">horizontal</property>
-                <property name="spacing">12</property>
+              <object class="AdwPreferencesGroup">
                 <child>
-                  <object class="GtkLabel">
-                    <property name="label">Name:</property>
-                    <property name="halign">start</property>
-                    <property name="width-chars">20</property>
-                    <style>
-                      <class name="dim-label"/>
-                    </style>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">Name</property>
+                    <child>
+                      <object class="GtkLabel" id="gpu_name_value">
+                        <property name="label">-</property>
+                        <style>
+                          <class name="dim-label"/>
+                        </style>
+                      </object>
+                    </child>
                   </object>
                 </child>
                 <child>
-                  <object class="GtkLabel" id="gpu_name_value">
-                    <property name="label">-</property>
-                    <property name="halign">start</property>
-                    <property name="hexpand">true</property>
-                    <property name="wrap">true</property>
-                    <property name="selectable">true</property>
-                  </object>
-                </child>
-              </object>
-            </child>
-            
-            <!-- GPU Driver -->
-            <child>
-              <object class="GtkBox">
-                <property name="orientation">horizontal</property>
-                <property name="spacing">12</property>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="label">Driver:</property>
-                    <property name="halign">start</property>
-                    <property name="width-chars">20</property>
-                    <style>
-                      <class name="dim-label"/>
-                    </style>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">Driver</property>
+                    <child>
+                      <object class="GtkLabel" id="gpu_driver_value">
+                        <property name="label">-</property>
+                        <style>
+                          <class name="dim-label"/>
+                        </style>
+                      </object>
+                    </child>
                   </object>
                 </child>
                 <child>
-                  <object class="GtkLabel" id="gpu_driver_value">
-                    <property name="label">-</property>
-                    <property name="halign">start</property>
-                    <property name="hexpand">true</property>
-                  </object>
-                </child>
-              </object>
-            </child>
-            
-            <!-- GPU Memory Total -->
-            <child>
-              <object class="GtkBox">
-                <property name="orientation">horizontal</property>
-                <property name="spacing">12</property>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="label">Memory Total:</property>
-                    <property name="halign">start</property>
-                    <property name="width-chars">20</property>
-                    <style>
-                      <class name="dim-label"/>
-                    </style>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">Memory Total</property>
+                    <child>
+                      <object class="GtkLabel" id="gpu_memory_total_value">
+                        <property name="label">-</property>
+                        <style>
+                          <class name="dim-label"/>
+                        </style>
+                      </object>
+                    </child>
                   </object>
                 </child>
                 <child>
-                  <object class="GtkLabel" id="gpu_memory_total_value">
-                    <property name="label">-</property>
-                    <property name="halign">start</property>
-                    <property name="hexpand">true</property>
-                  </object>
-                </child>
-              </object>
-            </child>
-            
-            <!-- GPU Memory Used -->
-            <child>
-              <object class="GtkBox">
-                <property name="orientation">horizontal</property>
-                <property name="spacing">12</property>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="label">Memory Used:</property>
-                    <property name="halign">start</property>
-                    <property name="width-chars">20</property>
-                    <style>
-                      <class name="dim-label"/>
-                    </style>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">Memory Used</property>
+                    <child>
+                      <object class="GtkLabel" id="gpu_memory_used_value">
+                        <property name="label">-</property>
+                        <style>
+                          <class name="dim-label"/>
+                        </style>
+                      </object>
+                    </child>
                   </object>
                 </child>
                 <child>
-                  <object class="GtkLabel" id="gpu_memory_used_value">
-                    <property name="label">-</property>
-                    <property name="halign">start</property>
-                    <property name="hexpand">true</property>
-                  </object>
-                </child>
-              </object>
-            </child>
-            
-            <!-- Current Usage -->
-            <child>
-              <object class="GtkBox">
-                <property name="orientation">horizontal</property>
-                <property name="spacing">12</property>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="label">Current Usage:</property>
-                    <property name="halign">start</property>
-                    <property name="width-chars">20</property>
-                    <style>
-                      <class name="dim-label"/>
-                    </style>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">Current Usage</property>
+                    <child>
+                      <object class="GtkLabel" id="gpu_usage_value">
+                        <property name="label">-</property>
+                        <style>
+                          <class name="dim-label"/>
+                        </style>
+                      </object>
+                    </child>
                   </object>
                 </child>
                 <child>
-                  <object class="GtkLabel" id="gpu_usage_value">
-                    <property name="label">-</property>
-                    <property name="halign">start</property>
-                    <property name="hexpand">true</property>
-                    <style>
-                      <class name="heading"/>
-                    </style>
-                  </object>
-                </child>
-              </object>
-            </child>
-            
-            <!-- Temperature -->
-            <child>
-              <object class="GtkBox">
-                <property name="orientation">horizontal</property>
-                <property name="spacing">12</property>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="label">Temperature:</property>
-                    <property name="halign">start</property>
-                    <property name="width-chars">20</property>
-                    <style>
-                      <class name="dim-label"/>
-                    </style>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">Temperature</property>
+                    <child>
+                      <object class="GtkLabel" id="gpu_temperature_value">
+                        <property name="label">-</property>
+                        <style>
+                          <class name="dim-label"/>
+                        </style>
+                      </object>
+                    </child>
                   </object>
                 </child>
                 <child>
-                  <object class="GtkLabel" id="gpu_temperature_value">
-                    <property name="label">-</property>
-                    <property name="halign">start</property>
-                    <property name="hexpand">true</property>
-                  </object>
-                </child>
-              </object>
-            </child>
-            
-            <!-- Power Usage -->
-            <child>
-              <object class="GtkBox">
-                <property name="orientation">horizontal</property>
-                <property name="spacing">12</property>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="label">Power Usage:</property>
-                    <property name="halign">start</property>
-                    <property name="width-chars">20</property>
-                    <style>
-                      <class name="dim-label"/>
-                    </style>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="gpu_power_value">
-                    <property name="label">-</property>
-                    <property name="halign">start</property>
-                    <property name="hexpand">true</property>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">Power Usage</property>
+                    <child>
+                      <object class="GtkLabel" id="gpu_power_value">
+                        <property name="label">-</property>
+                        <style>
+                          <class name="dim-label"/>
+                        </style>
+                      </object>
+                    </child>
                   </object>
                 </child>
               </object>
