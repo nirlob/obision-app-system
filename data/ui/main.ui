@@ -98,6 +98,66 @@
                             <property name="margin-bottom">8</property>
                             <child>
                               <object class="GtkImage">
+                                <property name="icon-name">utilities-system-monitor-symbolic</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="label" translatable="yes">CPU</property>
+                                <property name="halign">start</property>
+                                <property name="hexpand">true</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="menu_option_2">
+                        <property name="halign">fill</property>
+                        <style>
+                          <class name="flat"/>
+                        </style>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="orientation">horizontal</property>
+                            <property name="spacing">12</property>
+                            <property name="margin-start">6</property>
+                            <property name="margin-end">6</property>
+                            <property name="margin-top">8</property>
+                            <property name="margin-bottom">8</property>
+                            <child>
+                              <object class="GtkImage">
+                                <property name="icon-name">video-display-symbolic</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="label" translatable="yes">GPU</property>
+                                <property name="halign">start</property>
+                                <property name="hexpand">true</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="menu_option_3">
+                        <property name="halign">fill</property>
+                        <style>
+                          <class name="flat"/>
+                        </style>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="orientation">horizontal</property>
+                            <property name="spacing">12</property>
+                            <property name="margin-start">6</property>
+                            <property name="margin-end">6</property>
+                            <property name="margin-top">8</property>
+                            <property name="margin-bottom">8</property>
+                            <child>
+                              <object class="GtkImage">
                                 <property name="icon-name">system-run-symbolic</property>
                               </object>
                             </child>
@@ -122,7 +182,7 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkButton" id="menu_option_2">
+                      <object class="GtkButton" id="menu_option_4">
                         <property name="halign">fill</property>
                         <style>
                           <class name="flat"/>
@@ -152,7 +212,7 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkButton" id="menu_option_3">
+                      <object class="GtkButton" id="menu_option_5">
                         <property name="halign">fill</property>
                         <style>
                           <class name="flat"/>
@@ -182,7 +242,7 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkButton" id="menu_option_4">
+                      <object class="GtkButton" id="menu_option_6">
                         <property name="halign">fill</property>
                         <style>
                           <class name="flat"/>

@@ -181,6 +181,38 @@ if (fs.existsSync(resumeComponentFile)) {
     combinedContent += resumeContent + '\n';
 }
 
+// Add CPU component
+const cpuComponentFile = path.join(BUILD_DIR, 'components', 'cpu.js');
+if (fs.existsSync(cpuComponentFile)) {
+    console.log('📋 Adding CpuComponent...');
+    let cpuContent = fs.readFileSync(cpuComponentFile, 'utf8');
+
+    const classStartIndex = cpuContent.indexOf('class CpuComponent {');
+    if (classStartIndex !== -1) {
+        cpuContent = cpuContent.substring(classStartIndex);
+    }
+
+    cpuContent = cleanJSContent(cpuContent)
+        .replace(/utils_service_1\./g, '');
+    combinedContent += cpuContent + '\n';
+}
+
+// Add GPU component
+const gpuComponentFile = path.join(BUILD_DIR, 'components', 'gpu.js');
+if (fs.existsSync(gpuComponentFile)) {
+    console.log('📋 Adding GpuComponent...');
+    let gpuContent = fs.readFileSync(gpuComponentFile, 'utf8');
+
+    const classStartIndex = gpuContent.indexOf('class GpuComponent {');
+    if (classStartIndex !== -1) {
+        gpuContent = gpuContent.substring(classStartIndex);
+    }
+
+    gpuContent = cleanJSContent(gpuContent)
+        .replace(/utils_service_1\./g, '');
+    combinedContent += gpuContent + '\n';
+}
+
 // Add SystemInfo component
 const systemInfoComponentFile = path.join(BUILD_DIR, 'components', 'system-info.js');
 if (fs.existsSync(systemInfoComponentFile)) {
@@ -282,6 +314,8 @@ if (fs.existsSync(mainJsFile)) {
     // Clean up TypeScript/CommonJS artifacts using our function
     mainContent = cleanJSContent(mainContent)
         .replace(/resume_1\./g, '')
+        .replace(/cpu_1\./g, '')
+        .replace(/gpu_1\./g, '')
         .replace(/system_info_1\./g, '')
         .replace(/resources_1\./g, '')
         .replace(/processes_1\./g, '')

@@ -3,6 +3,8 @@ import Gtk from '@girs/gtk-4.0';
 import Gdk from '@girs/gdk-4.0';
 import Adw from '@girs/adw-1';
 import { ResumeComponent } from './components/resume';
+import { CpuComponent } from './components/cpu';
+import { GpuComponent } from './components/gpu';
 import { SystemInfoComponent } from './components/system-info';
 import { ResourcesComponent } from './components/resources';
 import { ProcessesComponent } from './components/processes';
@@ -111,6 +113,8 @@ class ObisionStatusApplication {
     const menuButton2 = builder.get_object('menu_option_2') as Gtk.Button;
     const menuButton3 = builder.get_object('menu_option_3') as Gtk.Button;
     const menuButton4 = builder.get_object('menu_option_4') as Gtk.Button;
+    const menuButton5 = builder.get_object('menu_option_5') as Gtk.Button;
+    const menuButton6 = builder.get_object('menu_option_6') as Gtk.Button;
 
     // Setup navigation
     menuButton0.connect('clicked', () => {
@@ -127,6 +131,12 @@ class ObisionStatusApplication {
     });
     menuButton4.connect('clicked', () => {
       this.onNavigationItemSelected(4, mainContent);
+    });
+    menuButton5.connect('clicked', () => {
+      this.onNavigationItemSelected(5, mainContent);
+    });
+    menuButton6.connect('clicked', () => {
+      this.onNavigationItemSelected(6, mainContent);
     });
 
     // Show first view by default
@@ -149,16 +159,22 @@ class ObisionStatusApplication {
       case 0: // Resume
         this.showResume(contentBox);
         break;
-      case 1: // System Info
+      case 1: // CPU
+        this.showCpu(contentBox);
+        break;
+      case 2: // GPU
+        this.showGpu(contentBox);
+        break;
+      case 3: // System Info
         this.showSystemInfo(contentBox);
         break;
-      case 2: // Resources
+      case 4: // Resources
         this.showResources(contentBox);
         break;
-      case 3: // Processes
+      case 5: // Processes
         this.showProcesses(contentBox);
         break;
-      case 4: // Services
+      case 6: // Services
         this.showServices(contentBox);
         break;
     }
@@ -166,6 +182,16 @@ class ObisionStatusApplication {
 
   private showResume(contentBox: Gtk.Box): void {
     const component = new ResumeComponent();
+    contentBox.append(component.getWidget());
+  }
+
+  private showCpu(contentBox: Gtk.Box): void {
+    const component = new CpuComponent();
+    contentBox.append(component.getWidget());
+  }
+
+  private showGpu(contentBox: Gtk.Box): void {
+    const component = new GpuComponent();
     contentBox.append(component.getWidget());
   }
 

@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <object class="GtkBox" id="cpu_container">
+    <property name="orientation">vertical</property>
+    <property name="spacing">0</property>
+    <property name="vexpand">true</property>
+    <property name="hexpand">true</property>
+    
+    <!-- Chart Section -->
+    <child>
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <property name="spacing">12</property>
+        <property name="margin-start">24</property>
+        <property name="margin-end">24</property>
+        <property name="margin-top">24</property>
+        <property name="margin-bottom">12</property>
+        <child>
+          <object class="GtkLabel">
+            <property name="label">CPU Usage History</property>
+            <property name="halign">start</property>
+            <property name="hexpand">true</property>
+            <style>
+              <class name="title-2"/>
+            </style>
+          </object>
+        </child>
+        <child>
+          <object class="GtkFrame">
+            <property name="vexpand">false</property>
+            <child>
+              <object class="GtkDrawingArea" id="cpu_chart">
+                <property name="width-request">600</property>
+                <property name="height-request">200</property>
+                <property name="hexpand">true</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+    
+    <!-- CPU Information Section -->
+    <child>
+      <object class="GtkScrolledWindow">
+        <property name="vexpand">true</property>
+        <property name="hexpand">true</property>
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">vertical</property>
+            <property name="spacing">12</property>
+            <property name="margin-start">24</property>
+            <property name="margin-end">24</property>
+            <property name="margin-top">12</property>
+            <property name="margin-bottom">24</property>
+            
+            <!-- CPU Info Title -->
+            <child>
+              <object class="GtkLabel">
+                <property name="label">CPU Information</property>
+                <property name="halign">start</property>
+                <property name="hexpand">true</property>
+                <style>
+                  <class name="title-2"/>
+                </style>
+              </object>
+            </child>
+            
+            <!-- CPU Model -->
+            <child>
+              <object class="GtkBox">
+                <property name="orientation">horizontal</property>
+                <property name="spacing">12</property>
+                <child>
+                  <object class="GtkLabel" id="cpu_model_label">
+                    <property name="label">Model:</property>
+                    <property name="halign">start</property>
+                    <property name="width-chars">20</property>
+                    <style>
+                      <class name="dim-label"/>
+                    </style>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="cpu_model_value">
+                    <property name="label">-</property>
+                    <property name="halign">start</property>
+                    <property name="hexpand">true</property>
+                    <property name="wrap">true</property>
+                    <property name="selectable">true</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            
+            <!-- CPU Cores -->
+            <child>
+              <object class="GtkBox">
+                <property name="orientation">horizontal</property>
+                <property name="spacing">12</property>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label">Cores:</property>
+                    <property name="halign">start</property>
+                    <property name="width-chars">20</property>
+                    <style>
+                      <class name="dim-label"/>
+                    </style>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="cpu_cores_value">
+                    <property name="label">-</property>
+                    <property name="halign">start</property>
+                    <property name="hexpand">true</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            
+            <!-- CPU Threads -->
+            <child>
+              <object class="GtkBox">
+                <property name="orientation">horizontal</property>
+                <property name="spacing">12</property>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label">Threads:</property>
+                    <property name="halign">start</property>
+                    <property name="width-chars">20</property>
+                    <style>
+                      <class name="dim-label"/>
+                    </style>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="cpu_threads_value">
+                    <property name="label">-</property>
+                    <property name="halign">start</property>
+                    <property name="hexpand">true</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            
+            <!-- Current Usage -->
+            <child>
+              <object class="GtkBox">
+                <property name="orientation">horizontal</property>
+                <property name="spacing">12</property>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label">Current Usage:</property>
+                    <property name="halign">start</property>
+                    <property name="width-chars">20</property>
+                    <style>
+                      <class name="dim-label"/>
+                    </style>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="cpu_usage_value">
+                    <property name="label">-</property>
+                    <property name="halign">start</property>
+                    <property name="hexpand">true</property>
+                    <style>
+                      <class name="heading"/>
+                    </style>
+                  </object>
+                </child>
+              </object>
+            </child>
+            
+            <!-- Frequency -->
+            <child>
+              <object class="GtkBox">
+                <property name="orientation">horizontal</property>
+                <property name="spacing">12</property>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label">Current Frequency:</property>
+                    <property name="halign">start</property>
+                    <property name="width-chars">20</property>
+                    <style>
+                      <class name="dim-label"/>
+                    </style>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="cpu_frequency_value">
+                    <property name="label">-</property>
+                    <property name="halign">start</property>
+                    <property name="hexpand">true</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            
+            <!-- Max Frequency -->
+            <child>
+              <object class="GtkBox">
+                <property name="orientation">horizontal</property>
+                <property name="spacing">12</property>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label">Max Frequency:</property>
+                    <property name="halign">start</property>
+                    <property name="width-chars">20</property>
+                    <style>
+                      <class name="dim-label"/>
+                    </style>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="cpu_max_frequency_value">
+                    <property name="label">-</property>
+                    <property name="halign">start</property>
+                    <property name="hexpand">true</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            
+            <!-- Architecture -->
+            <child>
+              <object class="GtkBox">
+                <property name="orientation">horizontal</property>
+                <property name="spacing">12</property>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label">Architecture:</property>
+                    <property name="halign">start</property>
+                    <property name="width-chars">20</property>
+                    <style>
+                      <class name="dim-label"/>
+                    </style>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="cpu_architecture_value">
+                    <property name="label">-</property>
+                    <property name="halign">start</property>
+                    <property name="hexpand">true</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>
