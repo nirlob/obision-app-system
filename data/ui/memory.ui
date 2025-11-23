@@ -33,27 +33,28 @@
       </object>
     </child>
     <child>
-      <object class="GtkScrolledWindow">
-        <property name="vexpand">true</property>
-        <property name="hscrollbar-policy">never</property>
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <property name="spacing">12</property>
         <child>
-          <object class="GtkBox">
-            <property name="orientation">vertical</property>
-            <property name="spacing">12</property>
-            <child>
-              <object class="GtkLabel">
-                <property name="label" translatable="yes">Information</property>
-                <property name="halign">start</property>
-                <attributes>
-                  <attribute name="weight" value="bold"/>
-                </attributes>
-              </object>
-            </child>
+          <object class="GtkLabel">
+            <property name="label" translatable="yes">Information</property>
+            <property name="halign">start</property>
+            <attributes>
+              <attribute name="weight" value="bold"/>
+            </attributes>
+          </object>
+        </child>
+        <child>
+          <object class="GtkScrolledWindow">
+            <property name="vexpand">true</property>
+            <property name="hscrollbar-policy">never</property>
             <child>
               <object class="AdwPreferencesGroup">
                 <child>
                   <object class="AdwActionRow">
                     <property name="title" translatable="yes">Total Memory</property>
+                    <property name="subtitle" translatable="yes">Total physical RAM installed</property>
                     <child>
                       <object class="GtkLabel" id="memory_total_value">
                         <property name="label">-</property>
@@ -67,6 +68,7 @@
                 <child>
                   <object class="AdwActionRow">
                     <property name="title" translatable="yes">Used Memory</property>
+                    <property name="subtitle" translatable="yes">Memory actively used by applications</property>
                     <child>
                       <object class="GtkLabel" id="memory_used_value">
                         <property name="label">-</property>
@@ -80,6 +82,7 @@
                 <child>
                   <object class="AdwActionRow">
                     <property name="title" translatable="yes">Free Memory</property>
+                    <property name="subtitle" translatable="yes">Completely unused memory</property>
                     <child>
                       <object class="GtkLabel" id="memory_free_value">
                         <property name="label">-</property>
@@ -93,6 +96,7 @@
                 <child>
                   <object class="AdwActionRow">
                     <property name="title" translatable="yes">Available Memory</property>
+                    <property name="subtitle" translatable="yes">Memory available for applications (includes reclaimable cache)</property>
                     <child>
                       <object class="GtkLabel" id="memory_available_value">
                         <property name="label">-</property>
@@ -106,6 +110,7 @@
                 <child>
                   <object class="AdwActionRow">
                     <property name="title" translatable="yes">Cached</property>
+                    <property name="subtitle" translatable="yes">File cache for faster disk access</property>
                     <child>
                       <object class="GtkLabel" id="memory_cached_value">
                         <property name="label">-</property>
@@ -119,6 +124,7 @@
                 <child>
                   <object class="AdwActionRow">
                     <property name="title" translatable="yes">Buffers</property>
+                    <property name="subtitle" translatable="yes">Memory used for I/O buffers</property>
                     <child>
                       <object class="GtkLabel" id="memory_buffers_value">
                         <property name="label">-</property>
@@ -132,6 +138,7 @@
                 <child>
                   <object class="AdwActionRow">
                     <property name="title" translatable="yes">Swap Total</property>
+                    <property name="subtitle" translatable="yes">Total swap space on disk</property>
                     <child>
                       <object class="GtkLabel" id="memory_swap_total_value">
                         <property name="label">-</property>
@@ -145,6 +152,7 @@
                 <child>
                   <object class="AdwActionRow">
                     <property name="title" translatable="yes">Swap Used</property>
+                    <property name="subtitle" translatable="yes">Swap space currently in use</property>
                     <child>
                       <object class="GtkLabel" id="memory_swap_used_value">
                         <property name="label">-</property>
@@ -158,8 +166,149 @@
                 <child>
                   <object class="AdwActionRow">
                     <property name="title" translatable="yes">Usage Percentage</property>
+                    <property name="subtitle" translatable="yes">Percentage of memory in use</property>
                     <child>
                       <object class="GtkLabel" id="memory_usage_value">
+                        <property name="label">-</property>
+                        <style>
+                          <class name="dim-label"/>
+                        </style>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">Shared Memory</property>
+                    <property name="subtitle" translatable="yes">Memory shared between processes</property>
+                    <child>
+                      <object class="GtkLabel" id="memory_shared_value">
+                        <property name="label">-</property>
+                        <style>
+                          <class name="dim-label"/>
+                        </style>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">Slab Memory</property>
+                    <property name="subtitle" translatable="yes">Kernel object cache allocator</property>
+                    <child>
+                      <object class="GtkLabel" id="memory_slab_value">
+                        <property name="label">-</property>
+                        <style>
+                          <class name="dim-label"/>
+                        </style>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">Active Memory</property>
+                    <property name="subtitle" translatable="yes">Recently used, unlikely to be reclaimed</property>
+                    <child>
+                      <object class="GtkLabel" id="memory_active_value">
+                        <property name="label">-</property>
+                        <style>
+                          <class name="dim-label"/>
+                        </style>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">Inactive Memory</property>
+                    <property name="subtitle" translatable="yes">Not recently used, can be reclaimed</property>
+                    <child>
+                      <object class="GtkLabel" id="memory_inactive_value">
+                        <property name="label">-</property>
+                        <style>
+                          <class name="dim-label"/>
+                        </style>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">Dirty Pages</property>
+                    <property name="subtitle" translatable="yes">Modified pages waiting to be written to disk</property>
+                    <child>
+                      <object class="GtkLabel" id="memory_dirty_value">
+                        <property name="label">-</property>
+                        <style>
+                          <class name="dim-label"/>
+                        </style>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">Writeback</property>
+                    <property name="subtitle" translatable="yes">Pages being written back to disk</property>
+                    <child>
+                      <object class="GtkLabel" id="memory_writeback_value">
+                        <property name="label">-</property>
+                        <style>
+                          <class name="dim-label"/>
+                        </style>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">Mapped</property>
+                    <property name="subtitle" translatable="yes">Memory-mapped files in use</property>
+                    <child>
+                      <object class="GtkLabel" id="memory_mapped_value">
+                        <property name="label">-</property>
+                        <style>
+                          <class name="dim-label"/>
+                        </style>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">Page Tables</property>
+                    <property name="subtitle" translatable="yes">Memory used for page table structures</property>
+                    <child>
+                      <object class="GtkLabel" id="memory_pagetables_value">
+                        <property name="label">-</property>
+                        <style>
+                          <class name="dim-label"/>
+                        </style>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">Kernel Stack</property>
+                    <property name="subtitle" translatable="yes">Memory used by kernel stack space</property>
+                    <child>
+                      <object class="GtkLabel" id="memory_kernelstack_value">
+                        <property name="label">-</property>
+                        <style>
+                          <class name="dim-label"/>
+                        </style>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">Swap Cached</property>
+                    <property name="subtitle" translatable="yes">Swapped memory brought back to RAM</property>
+                    <child>
+                      <object class="GtkLabel" id="memory_swap_cached_value">
                         <property name="label">-</property>
                         <style>
                           <class name="dim-label"/>

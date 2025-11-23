@@ -12,26 +12,89 @@
         <property name="orientation">vertical</property>
         <property name="spacing">12</property>
         <child>
-          <object class="GtkLabel">
-            <property name="label">Usage History</property>
-            <property name="halign">start</property>
-            <property name="hexpand">true</property>
-            <attributes>
-              <attribute name="weight" value="bold"/>
-            </attributes>
+          <object class="GtkBox">
+            <property name="orientation">horizontal</property>
+            <property name="margin-top">6</property>
+            <property name="margin-bottom">6</property>
+            <property name="spacing">12</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="label">CPU Load</property>
+                <property name="halign">start</property>
+                <property name="hexpand">true</property>
+                <attributes>
+                  <attribute name="weight" value="bold"/>
+                </attributes>
+              </object>
+            </child>
+            <child>
+              <object class="GtkBox" id="chart_toggle_group">
+                <property name="orientation">horizontal</property>
+                <property name="spacing">0</property>
+                <property name="halign">end</property>
+                <style>
+                  <class name="linked"/>
+                </style>
+                <child>
+                  <object class="GtkToggleButton" id="general_button">
+                    <property name="label">General</property>
+                    <property name="active">true</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkToggleButton" id="cores_button">
+                    <property name="label">Cores</property>
+                    <property name="group">general_button</property>
+                  </object>
+                </child>
+              </object>
+            </child>
           </object>
         </child>
         <child>
-          <object class="GtkFrame">
+          <object class="GtkStack" id="chart_stack">
             <property name="vexpand">false</property>
             <property name="hexpand">true</property>
-            <style>
-              <class name="view"/>
-            </style>
             <child>
-              <object class="GtkDrawingArea" id="cpu_chart">
-                <property name="height-request">200</property>
-                <property name="hexpand">true</property>
+              <object class="GtkStackPage">
+                <property name="name">overall</property>
+                <property name="title">General</property>
+                <property name="child">
+                  <object class="GtkFrame">
+                    <property name="vexpand">false</property>
+                    <property name="hexpand">true</property>
+                    <style>
+                      <class name="view"/>
+                    </style>
+                    <child>
+                      <object class="GtkDrawingArea" id="cpu_chart">
+                        <property name="height-request">200</property>
+                        <property name="hexpand">true</property>
+                      </object>
+                    </child>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkStackPage">
+                <property name="name">percore</property>
+                <property name="title">Cores</property>
+                <property name="child">
+                  <object class="GtkFrame">
+                    <property name="vexpand">false</property>
+                    <property name="hexpand">true</property>
+                    <style>
+                      <class name="view"/>
+                    </style>
+                    <child>
+                      <object class="GtkDrawingArea" id="cpu_percore_chart">
+                        <property name="height-request">200</property>
+                        <property name="hexpand">true</property>
+                      </object>
+                    </child>
+                  </object>
+                </property>
               </object>
             </child>
           </object>
@@ -41,31 +104,33 @@
     
     <!-- CPU Information Section -->
     <child>
-      <object class="GtkScrolledWindow">
-        <property name="vexpand">true</property>
-        <property name="hexpand">true</property>
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <property name="spacing">12</property>
+        
+        <!-- CPU Info Title -->
         <child>
-          <object class="GtkBox">
-            <property name="orientation">vertical</property>
-            <property name="spacing">12</property>
-            
-            <!-- CPU Info Title -->
-            <child>
-              <object class="GtkLabel">
-                <property name="label">Information</property>
-                <property name="halign">start</property>
-                <property name="hexpand">true</property>
-                <attributes>
-                  <attribute name="weight" value="bold"/>
-                </attributes>
-              </object>
-            </child>
-            
+          <object class="GtkLabel">
+            <property name="label">Information</property>
+            <property name="halign">start</property>
+            <property name="hexpand">true</property>
+            <property name="margin-top">12</property>
+            <attributes>
+              <attribute name="weight" value="bold"/>
+            </attributes>
+          </object>
+        </child>
+        
+        <child>
+          <object class="GtkScrolledWindow">
+            <property name="vexpand">true</property>
+            <property name="hexpand">true</property>
             <child>
               <object class="AdwPreferencesGroup">
                 <child>
                   <object class="AdwActionRow">
                     <property name="title" translatable="yes">Model</property>
+                    <property name="subtitle" translatable="yes">CPU model name and generation</property>
                     <child>
                       <object class="GtkLabel" id="cpu_model_value">
                         <property name="label">-</property>
@@ -78,7 +143,8 @@
                 </child>
                 <child>
                   <object class="AdwActionRow">
-                    <property name="title" translatable="yes">Cores</property>
+                    <property name="title" translatable="yes">Physical Cores</property>
+                    <property name="subtitle" translatable="yes">Number of physical processor cores</property>
                     <child>
                       <object class="GtkLabel" id="cpu_cores_value">
                         <property name="label">-</property>
@@ -91,7 +157,22 @@
                 </child>
                 <child>
                   <object class="AdwActionRow">
+                    <property name="title" translatable="yes">Logical Cores</property>
+                    <property name="subtitle" translatable="yes">Additional virtual cores from hyperthreading</property>
+                    <child>
+                      <object class="GtkLabel" id="cpu_logical_cores_value">
+                        <property name="label">-</property>
+                        <style>
+                          <class name="dim-label"/>
+                        </style>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwActionRow">
                     <property name="title" translatable="yes">Threads</property>
+                    <property name="subtitle" translatable="yes">Total processing threads available</property>
                     <child>
                       <object class="GtkLabel" id="cpu_threads_value">
                         <property name="label">-</property>
@@ -105,6 +186,7 @@
                 <child>
                   <object class="AdwActionRow">
                     <property name="title" translatable="yes">Current Usage</property>
+                    <property name="subtitle" translatable="yes">Percentage of CPU currently in use</property>
                     <child>
                       <object class="GtkLabel" id="cpu_usage_value">
                         <property name="label">-</property>
@@ -118,6 +200,7 @@
                 <child>
                   <object class="AdwActionRow">
                     <property name="title" translatable="yes">Current Frequency</property>
+                    <property name="subtitle" translatable="yes">Current operating frequency</property>
                     <child>
                       <object class="GtkLabel" id="cpu_frequency_value">
                         <property name="label">-</property>
@@ -131,6 +214,7 @@
                 <child>
                   <object class="AdwActionRow">
                     <property name="title" translatable="yes">Max Frequency</property>
+                    <property name="subtitle" translatable="yes">Maximum turbo frequency</property>
                     <child>
                       <object class="GtkLabel" id="cpu_max_frequency_value">
                         <property name="label">-</property>
@@ -144,6 +228,7 @@
                 <child>
                   <object class="AdwActionRow">
                     <property name="title" translatable="yes">Architecture</property>
+                    <property name="subtitle" translatable="yes">Processor architecture type</property>
                     <child>
                       <object class="GtkLabel" id="cpu_architecture_value">
                         <property name="label">-</property>
@@ -154,9 +239,148 @@
                     </child>
                   </object>
                 </child>
+                <child>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">Vendor</property>
+                    <property name="subtitle" translatable="yes">CPU manufacturer identifier</property>
+                    <child>
+                      <object class="GtkLabel" id="cpu_vendor_value">
+                        <property name="label">-</property>
+                        <style>
+                          <class name="dim-label"/>
+                        </style>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">CPU Family</property>
+                    <property name="subtitle" translatable="yes">Processor family classification</property>
+                    <child>
+                      <object class="GtkLabel" id="cpu_family_value">
+                        <property name="label">-</property>
+                        <style>
+                          <class name="dim-label"/>
+                        </style>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">Model ID</property>
+                    <property name="subtitle" translatable="yes">Specific model identifier number</property>
+                    <child>
+                      <object class="GtkLabel" id="cpu_model_id_value">
+                        <property name="label">-</property>
+                        <style>
+                          <class name="dim-label"/>
+                        </style>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">Stepping</property>
+                    <property name="subtitle" translatable="yes">CPU revision level</property>
+                    <child>
+                      <object class="GtkLabel" id="cpu_stepping_value">
+                        <property name="label">-</property>
+                        <style>
+                          <class name="dim-label"/>
+                        </style>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">L1d Cache</property>
+                    <property name="subtitle" translatable="yes">Level 1 data cache size</property>
+                    <child>
+                      <object class="GtkLabel" id="cpu_l1d_cache_value">
+                        <property name="label">-</property>
+                        <style>
+                          <class name="dim-label"/>
+                        </style>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">L1i Cache</property>
+                    <property name="subtitle" translatable="yes">Level 1 instruction cache size</property>
+                    <child>
+                      <object class="GtkLabel" id="cpu_l1i_cache_value">
+                        <property name="label">-</property>
+                        <style>
+                          <class name="dim-label"/>
+                        </style>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">L2 Cache</property>
+                    <property name="subtitle" translatable="yes">Level 2 unified cache size</property>
+                    <child>
+                      <object class="GtkLabel" id="cpu_l2_cache_value">
+                        <property name="label">-</property>
+                        <style>
+                          <class name="dim-label"/>
+                        </style>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">L3 Cache</property>
+                    <property name="subtitle" translatable="yes">Level 3 shared cache size</property>
+                    <child>
+                      <object class="GtkLabel" id="cpu_l3_cache_value">
+                        <property name="label">-</property>
+                        <style>
+                          <class name="dim-label"/>
+                        </style>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">Virtualization</property>
+                    <property name="subtitle" translatable="yes">Hardware virtualization technology</property>
+                    <child>
+                      <object class="GtkLabel" id="cpu_virtualization_value">
+                        <property name="label">-</property>
+                        <style>
+                          <class name="dim-label"/>
+                        </style>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">BogoMIPS</property>
+                    <property name="subtitle" translatable="yes">Rough measure of CPU speed</property>
+                    <child>
+                      <object class="GtkLabel" id="cpu_bogomips_value">
+                        <property name="label">-</property>
+                        <style>
+                          <class name="dim-label"/>
+                        </style>
+                      </object>
+                    </child>
+                  </object>
+                </child>
               </object>
             </child>
-            
           </object>
         </child>
       </object>

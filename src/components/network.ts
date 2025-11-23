@@ -200,8 +200,8 @@ export class NetworkComponent {
       // Update speed labels
       this.networkDownloadSpeed.set_label(this.formatSpeed(totalDownloadSpeed));
       this.networkUploadSpeed.set_label(this.formatSpeed(totalUploadSpeed));
-      this.networkTotalDownload.set_label(this.formatBytes(totalRxBytes));
-      this.networkTotalUpload.set_label(this.formatBytes(totalTxBytes));
+      this.networkTotalDownload.set_label(this.utils.formatBytes(totalRxBytes));
+      this.networkTotalUpload.set_label(this.utils.formatBytes(totalTxBytes));
       
       // Update history (convert to Mbps for chart)
       const downloadMbps = (totalDownloadSpeed * 8) / 1000000;
@@ -304,8 +304,8 @@ export class NetworkComponent {
       // Update received/transmitted
       const rxLabel = (expanderRow as any)._rxLabel as Gtk.Label;
       const txLabel = (expanderRow as any)._txLabel as Gtk.Label;
-      if (rxLabel) rxLabel.set_label(this.formatBytes(stats.rxBytes));
-      if (txLabel) txLabel.set_label(this.formatBytes(stats.txBytes));
+      if (rxLabel) rxLabel.set_label(this.utils.formatBytes(stats.rxBytes));
+      if (txLabel) txLabel.set_label(this.utils.formatBytes(stats.txBytes));
       
     } catch (error) {
       console.error(`Error updating interface ${iface}:`, error);
@@ -320,16 +320,6 @@ export class NetworkComponent {
     } else {
       return `${(bytesPerSecond / (1024 * 1024)).toFixed(2)} MB/s`;
     }
-  }
-
-  private formatBytes(bytes: number): string {
-    if (bytes === 0) return '0 B';
-    
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    
-    return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`;
   }
 
   private drawLineChart(cr: any, width: number, height: number): void {

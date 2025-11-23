@@ -323,8 +323,8 @@ export class DiskComponent {
         // Update labels
         this.readSpeedLabel.set_label(`${totalReadSpeed.toFixed(2)} MB/s`);
         this.writeSpeedLabel.set_label(`${totalWriteSpeed.toFixed(2)} MB/s`);
-        this.totalReadLabel.set_label(this.formatBytes(this.totalBytesRead));
-        this.totalWriteLabel.set_label(this.formatBytes(this.totalBytesWritten));
+        this.totalReadLabel.set_label(this.utils.formatBytes(this.totalBytesRead));
+        this.totalWriteLabel.set_label(this.utils.formatBytes(this.totalBytesWritten));
 
         // Redraw chart
         this.diskChart.queue_draw();
@@ -368,13 +368,6 @@ export class DiskComponent {
         }
 
         return stats;
-    }
-
-    private formatBytes(bytes: number): string {
-        if (bytes < 1024) return `${bytes} B`;
-        if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`;
-        if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
-        return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
     }
 
     public getWidget(): Gtk.Box {

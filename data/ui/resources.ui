@@ -3,66 +3,395 @@
   <object class="GtkBox" id="resources_container">
     <property name="orientation">vertical</property>
     <property name="spacing">12</property>
+    
     <child>
-      <object class="GtkLabel" id="resources_title">
-        <property name="label" translatable="yes">System Resources</property>
-        <property name="halign">start</property>
-        <style>
-          <class name="title-1"/>
-        </style>
-      </object>
-    </child>
-    <child>
-      <object class="GtkLabel" id="resources_description">
-        <property name="label" translatable="yes">CPU, Memory, and Disk usage will be displayed here</property>
-        <property name="halign">start</property>
-      </object>
-    </child>
-    <child>
-      <object class="GtkBox">
-        <property name="orientation">vertical</property>
-        <property name="spacing">12</property>
-        <property name="margin-top">12</property>
+      <object class="GtkScrolledWindow">
+        <property name="vexpand">true</property>
+        <property name="hscrollbar-policy">never</property>
         <child>
           <object class="GtkBox">
             <property name="orientation">vertical</property>
-            <property name="spacing">6</property>
+            <property name="spacing">18</property>
+            <property name="margin-start">12</property>
+            <property name="margin-end">12</property>
+            <property name="margin-top">12</property>
+            <property name="margin-bottom">12</property>
+            
+            <!-- CPU Section -->
             <child>
-              <object class="GtkLabel">
-                <property name="label">CPU Usage</property>
-                <property name="halign">start</property>
+              <object class="GtkBox">
+                <property name="orientation">vertical</property>
+                <property name="spacing">12</property>
                 <style>
-                  <class name="title-4"/>
+                  <class name="card"/>
                 </style>
+                <child>
+                  <object class="GtkBox">
+                    <property name="orientation">vertical</property>
+                    <property name="spacing">12</property>
+                    <property name="margin-start">12</property>
+                    <property name="margin-end">12</property>
+                    <property name="margin-top">12</property>
+                    <property name="margin-bottom">12</property>
+                    
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="label">CPU Usage</property>
+                        <property name="halign">start</property>
+                        <style>
+                          <class name="title-3"/>
+                        </style>
+                      </object>
+                    </child>
+                    
+                    <child>
+                      <object class="GtkBox" id="cpu_cores_container">
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">8</property>
+                      </object>
+                    </child>
+                    
+                    <child>
+                      <object class="GtkDrawingArea" id="cpu_history_chart">
+                        <property name="height-request">120</property>
+                        <property name="vexpand">false</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
               </object>
             </child>
+            
+            <!-- Memory Section -->
             <child>
-              <object class="GtkProgressBar" id="cpu_progress">
-                <property name="fraction">0.45</property>
-                <property name="show-text">true</property>
-              </object>
-            </child>
-          </object>
-        </child>
-        <child>
-          <object class="GtkBox">
-            <property name="orientation">vertical</property>
-            <property name="spacing">6</property>
-            <child>
-              <object class="GtkLabel">
-                <property name="label">Memory Usage</property>
-                <property name="halign">start</property>
+              <object class="GtkBox">
+                <property name="orientation">vertical</property>
+                <property name="spacing">12</property>
                 <style>
-                  <class name="title-4"/>
+                  <class name="card"/>
                 </style>
+                <child>
+                  <object class="GtkBox">
+                    <property name="orientation">vertical</property>
+                    <property name="spacing">12</property>
+                    <property name="margin-start">12</property>
+                    <property name="margin-end">12</property>
+                    <property name="margin-top">12</property>
+                    <property name="margin-bottom">12</property>
+                    
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="label">Memory</property>
+                        <property name="halign">start</property>
+                        <style>
+                          <class name="title-3"/>
+                        </style>
+                      </object>
+                    </child>
+                    
+                    <child>
+                      <object class="GtkBox">
+                        <property name="orientation">horizontal</property>
+                        <property name="spacing">6</property>
+                        <child>
+                          <object class="GtkLabel" id="memory_label">
+                            <property name="label">Used: --</property>
+                            <property name="halign">start</property>
+                            <property name="hexpand">true</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="memory_percent">
+                            <property name="label">--%</property>
+                            <property name="halign">end</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    
+                    <child>
+                      <object class="GtkProgressBar" id="memory_progress">
+                        <property name="show-text">false</property>
+                      </object>
+                    </child>
+                    
+                    <child>
+                      <object class="GtkDrawingArea" id="memory_history_chart">
+                        <property name="height-request">120</property>
+                        <property name="vexpand">false</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
               </object>
             </child>
+            
+            <!-- Swap Section -->
             <child>
-              <object class="GtkProgressBar" id="memory_progress">
-                <property name="fraction">0.65</property>
-                <property name="show-text">true</property>
+              <object class="GtkBox">
+                <property name="orientation">vertical</property>
+                <property name="spacing">12</property>
+                <style>
+                  <class name="card"/>
+                </style>
+                <child>
+                  <object class="GtkBox">
+                    <property name="orientation">vertical</property>
+                    <property name="spacing">12</property>
+                    <property name="margin-start">12</property>
+                    <property name="margin-end">12</property>
+                    <property name="margin-top">12</property>
+                    <property name="margin-bottom">12</property>
+                    
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="label">Swap</property>
+                        <property name="halign">start</property>
+                        <style>
+                          <class name="title-3"/>
+                        </style>
+                      </object>
+                    </child>
+                    
+                    <child>
+                      <object class="GtkBox">
+                        <property name="orientation">horizontal</property>
+                        <property name="spacing">6</property>
+                        <child>
+                          <object class="GtkLabel" id="swap_label">
+                            <property name="label">Used: --</property>
+                            <property name="halign">start</property>
+                            <property name="hexpand">true</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="swap_percent">
+                            <property name="label">--%</property>
+                            <property name="halign">end</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    
+                    <child>
+                      <object class="GtkProgressBar" id="swap_progress">
+                        <property name="show-text">false</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
               </object>
             </child>
+            
+            <!-- Disk I/O Section -->
+            <child>
+              <object class="GtkBox">
+                <property name="orientation">vertical</property>
+                <property name="spacing">12</property>
+                <style>
+                  <class name="card"/>
+                </style>
+                <child>
+                  <object class="GtkBox">
+                    <property name="orientation">vertical</property>
+                    <property name="spacing">12</property>
+                    <property name="margin-start">12</property>
+                    <property name="margin-end">12</property>
+                    <property name="margin-top">12</property>
+                    <property name="margin-bottom">12</property>
+                    
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="label">Disk I/O</property>
+                        <property name="halign">start</property>
+                        <style>
+                          <class name="title-3"/>
+                        </style>
+                      </object>
+                    </child>
+                    
+                    <child>
+                      <object class="GtkBox">
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">6</property>
+                        <child>
+                          <object class="GtkLabel" id="disk_read_label">
+                            <property name="label">Read: -- MB/s</property>
+                            <property name="halign">start</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="disk_write_label">
+                            <property name="label">Write: -- MB/s</property>
+                            <property name="halign">start</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    
+                    <child>
+                      <object class="GtkDrawingArea" id="disk_history_chart">
+                        <property name="height-request">120</property>
+                        <property name="vexpand">false</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            
+            <!-- Network I/O Section -->
+            <child>
+              <object class="GtkBox">
+                <property name="orientation">vertical</property>
+                <property name="spacing">12</property>
+                <style>
+                  <class name="card"/>
+                </style>
+                <child>
+                  <object class="GtkBox">
+                    <property name="orientation">vertical</property>
+                    <property name="spacing">12</property>
+                    <property name="margin-start">12</property>
+                    <property name="margin-end">12</property>
+                    <property name="margin-top">12</property>
+                    <property name="margin-bottom">12</property>
+                    
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="label">Network I/O</property>
+                        <property name="halign">start</property>
+                        <style>
+                          <class name="title-3"/>
+                        </style>
+                      </object>
+                    </child>
+                    
+                    <child>
+                      <object class="GtkBox">
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">6</property>
+                        <child>
+                          <object class="GtkLabel" id="network_download_label">
+                            <property name="label">Download: -- MB/s</property>
+                            <property name="halign">start</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="network_upload_label">
+                            <property name="label">Upload: -- MB/s</property>
+                            <property name="halign">start</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    
+                    <child>
+                      <object class="GtkDrawingArea" id="network_history_chart">
+                        <property name="height-request">120</property>
+                        <property name="vexpand">false</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            
+            <!-- GPU Section -->
+            <child>
+              <object class="GtkBox" id="gpu_section">
+                <property name="orientation">vertical</property>
+                <property name="spacing">12</property>
+                <style>
+                  <class name="card"/>
+                </style>
+                <child>
+                  <object class="GtkBox">
+                    <property name="orientation">vertical</property>
+                    <property name="spacing">12</property>
+                    <property name="margin-start">12</property>
+                    <property name="margin-end">12</property>
+                    <property name="margin-top">12</property>
+                    <property name="margin-bottom">12</property>
+                    
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="label">GPU</property>
+                        <property name="halign">start</property>
+                        <style>
+                          <class name="title-3"/>
+                        </style>
+                      </object>
+                    </child>
+                    
+                    <child>
+                      <object class="GtkBox">
+                        <property name="orientation">horizontal</property>
+                        <property name="spacing">6</property>
+                        <child>
+                          <object class="GtkLabel" id="gpu_label">
+                            <property name="label">Usage: --</property>
+                            <property name="halign">start</property>
+                            <property name="hexpand">true</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="gpu_percent">
+                            <property name="label">--%</property>
+                            <property name="halign">end</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    
+                    <child>
+                      <object class="GtkProgressBar" id="gpu_progress">
+                        <property name="show-text">false</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            
+            <!-- Temperature Section -->
+            <child>
+              <object class="GtkBox">
+                <property name="orientation">vertical</property>
+                <property name="spacing">12</property>
+                <style>
+                  <class name="card"/>
+                </style>
+                <child>
+                  <object class="GtkBox">
+                    <property name="orientation">vertical</property>
+                    <property name="spacing">12</property>
+                    <property name="margin-start">12</property>
+                    <property name="margin-end">12</property>
+                    <property name="margin-top">12</property>
+                    <property name="margin-bottom">12</property>
+                    
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="label">Temperatures</property>
+                        <property name="halign">start</property>
+                        <style>
+                          <class name="title-3"/>
+                        </style>
+                      </object>
+                    </child>
+                    
+                    <child>
+                      <object class="GtkBox" id="temperatures_container">
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">8</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            
           </object>
         </child>
       </object>

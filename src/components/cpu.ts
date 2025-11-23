@@ -5,17 +5,38 @@ import { UtilsService } from '../services/utils-service';
 export class CpuComponent {
   private container: Gtk.Box;
   private cpuChart!: Gtk.DrawingArea;
+  private cpuPerCoreChart!: Gtk.DrawingArea;
+  private chartStack!: Gtk.Stack;
+  private generalButton!: Gtk.ToggleButton;
+  private coresButton!: Gtk.ToggleButton;
   private cpuModelValue!: Gtk.Label;
   private cpuCoresValue!: Gtk.Label;
+  private cpuLogicalCoresValue!: Gtk.Label;
   private cpuThreadsValue!: Gtk.Label;
   private cpuUsageValue!: Gtk.Label;
   private cpuFrequencyValue!: Gtk.Label;
   private cpuMaxFrequencyValue!: Gtk.Label;
   private cpuArchitectureValue!: Gtk.Label;
+  private cpuVendorValue!: Gtk.Label;
+  private cpuFamilyValue!: Gtk.Label;
+  private cpuModelIdValue!: Gtk.Label;
+  private cpuSteppingValue!: Gtk.Label;
+  private cpuL1dCacheValue!: Gtk.Label;
+  private cpuL1iCacheValue!: Gtk.Label;
+  private cpuL2CacheValue!: Gtk.Label;
+  private cpuL3CacheValue!: Gtk.Label;
+  private cpuVirtualizationValue!: Gtk.Label;
+  private cpuBogomipsValue!: Gtk.Label;
   private updateTimeoutId: number | null = null;
   private utils: UtilsService;
   private usageHistory: number[] = [];
+  private perCoreUsage: number[] = [];
+  private prevCoreIdle: number[] = [];
+  private prevCoreTotal: number[] = [];
   private readonly maxHistoryPoints = 60; // 60 data points for history
+  private prevIdle: number = 0;
+  private prevTotal: number = 0;
+  private numCores: number = 0;
 
   constructor() {
     this.utils = UtilsService.instance;
@@ -38,22 +59,55 @@ export class CpuComponent {
 
     this.container = builder.get_object('cpu_container') as Gtk.Box;
     this.cpuChart = builder.get_object('cpu_chart') as Gtk.DrawingArea;
+    this.cpuPerCoreChart = builder.get_object('cpu_percore_chart') as Gtk.DrawingArea;
+    this.chartStack = builder.get_object('chart_stack') as Gtk.Stack;
+    this.generalButton = builder.get_object('general_button') as Gtk.ToggleButton;
+    this.coresButton = builder.get_object('cores_button') as Gtk.ToggleButton;
     this.cpuModelValue = builder.get_object('cpu_model_value') as Gtk.Label;
     this.cpuCoresValue = builder.get_object('cpu_cores_value') as Gtk.Label;
+    this.cpuLogicalCoresValue = builder.get_object('cpu_logical_cores_value') as Gtk.Label;
     this.cpuThreadsValue = builder.get_object('cpu_threads_value') as Gtk.Label;
     this.cpuUsageValue = builder.get_object('cpu_usage_value') as Gtk.Label;
     this.cpuFrequencyValue = builder.get_object('cpu_frequency_value') as Gtk.Label;
     this.cpuMaxFrequencyValue = builder.get_object('cpu_max_frequency_value') as Gtk.Label;
     this.cpuArchitectureValue = builder.get_object('cpu_architecture_value') as Gtk.Label;
+    this.cpuVendorValue = builder.get_object('cpu_vendor_value') as Gtk.Label;
+    this.cpuFamilyValue = builder.get_object('cpu_family_value') as Gtk.Label;
+    this.cpuModelIdValue = builder.get_object('cpu_model_id_value') as Gtk.Label;
+    this.cpuSteppingValue = builder.get_object('cpu_stepping_value') as Gtk.Label;
+    this.cpuL1dCacheValue = builder.get_object('cpu_l1d_cache_value') as Gtk.Label;
+    this.cpuL1iCacheValue = builder.get_object('cpu_l1i_cache_value') as Gtk.Label;
+    this.cpuL2CacheValue = builder.get_object('cpu_l2_cache_value') as Gtk.Label;
+    this.cpuL3CacheValue = builder.get_object('cpu_l3_cache_value') as Gtk.Label;
+    this.cpuVirtualizationValue = builder.get_object('cpu_virtualization_value') as Gtk.Label;
+    this.cpuBogomipsValue = builder.get_object('cpu_bogomips_value') as Gtk.Label;
     
     // Initialize history with zeros
     for (let i = 0; i < this.maxHistoryPoints; i++) {
       this.usageHistory.push(0);
     }
     
-    // Setup drawing function for chart
+    // Setup drawing function for overall chart
     this.cpuChart.set_draw_func((area, cr, width, height) => {
       this.drawLineChart(cr, width, height);
+    });
+    
+    // Setup drawing function for per-core chart
+    this.cpuPerCoreChart.set_draw_func((area, cr, width, height) => {
+      this.drawPerCoreChart(cr, width, height);
+    });
+    
+    // Setup toggle button handlers
+    this.generalButton.connect('toggled', () => {
+      if (this.generalButton.get_active()) {
+        this.chartStack.set_visible_child_name('overall');
+      }
+    });
+    
+    this.coresButton.connect('toggled', () => {
+      if (this.coresButton.get_active()) {
+        this.chartStack.set_visible_child_name('percore');
+      }
     });
     
     // Load static CPU info
@@ -71,32 +125,91 @@ export class CpuComponent {
 
   private loadCpuInfo(): void {
     try {
-      // Get CPU model
-      const [modelOut] = this.utils.executeCommand('lscpu', []);
+      // Get CPU model (force English output with LC_ALL=C)
+      const [modelOut] = this.utils.executeCommand('sh', ['-c', 'LC_ALL=C lscpu']);
       const modelMatch = modelOut.match(/Model name:\s+(.+)/);
       if (modelMatch) {
         this.cpuModelValue.set_label(modelMatch[1].trim());
       }
       
       // Get cores and threads
+      const totalCoresMatch = modelOut.match(/CPU\(s\):\s+(\d+)/);
       const coresMatch = modelOut.match(/Core\(s\) per socket:\s+(\d+)/);
       const socketsMatch = modelOut.match(/Socket\(s\):\s+(\d+)/);
-      const threadsMatch = modelOut.match(/Thread\(s\) per core:\s+(\d+)/);
       
-      if (coresMatch && socketsMatch) {
-        const cores = parseInt(coresMatch[1]) * parseInt(socketsMatch[1]);
-        this.cpuCoresValue.set_label(cores.toString());
+      if (totalCoresMatch && coresMatch && socketsMatch) {
+        const totalCores = parseInt(totalCoresMatch[1]);
+        const physicalCores = parseInt(coresMatch[1]) * parseInt(socketsMatch[1]);
         
-        if (threadsMatch) {
-          const threads = cores * parseInt(threadsMatch[1]);
-          this.cpuThreadsValue.set_label(threads.toString());
-        }
+        this.cpuCoresValue.set_label(physicalCores.toString());
+        this.cpuThreadsValue.set_label(totalCores.toString());
+        
+        // Calculate logical cores (total cores - physical cores)
+        const logicalCores = totalCores - physicalCores;
+        this.cpuLogicalCoresValue.set_label(logicalCores.toString());
       }
       
       // Get architecture
       const archMatch = modelOut.match(/Architecture:\s+(.+)/);
       if (archMatch) {
         this.cpuArchitectureValue.set_label(archMatch[1].trim());
+      }
+      
+      // Get vendor ID
+      const vendorMatch = modelOut.match(/Vendor ID:\s+(.+)/);
+      if (vendorMatch) {
+        this.cpuVendorValue.set_label(vendorMatch[1].trim());
+      }
+      
+      // Get CPU family
+      const familyMatch = modelOut.match(/CPU family:\s+(\d+)/);
+      if (familyMatch) {
+        this.cpuFamilyValue.set_label(familyMatch[1].trim());
+      }
+      
+      // Get Model ID
+      const modelIdMatch = modelOut.match(/Model:\s+(\d+)/);
+      if (modelIdMatch) {
+        this.cpuModelIdValue.set_label(modelIdMatch[1].trim());
+      }
+      
+      // Get Stepping
+      const steppingMatch = modelOut.match(/Stepping:\s+(\d+)/);
+      if (steppingMatch) {
+        this.cpuSteppingValue.set_label(steppingMatch[1].trim());
+      }
+      
+      // Get cache sizes
+      const l1dMatch = modelOut.match(/L1d cache:\s+(.+)/);
+      if (l1dMatch) {
+        this.cpuL1dCacheValue.set_label(l1dMatch[1].trim());
+      }
+      
+      const l1iMatch = modelOut.match(/L1i cache:\s+(.+)/);
+      if (l1iMatch) {
+        this.cpuL1iCacheValue.set_label(l1iMatch[1].trim());
+      }
+      
+      const l2Match = modelOut.match(/L2 cache:\s+(.+)/);
+      if (l2Match) {
+        this.cpuL2CacheValue.set_label(l2Match[1].trim());
+      }
+      
+      const l3Match = modelOut.match(/L3 cache:\s+(.+)/);
+      if (l3Match) {
+        this.cpuL3CacheValue.set_label(l3Match[1].trim());
+      }
+      
+      // Get virtualization
+      const virtMatch = modelOut.match(/Virtualization:\s+(.+)/);
+      if (virtMatch) {
+        this.cpuVirtualizationValue.set_label(virtMatch[1].trim());
+      }
+      
+      // Get BogoMIPS
+      const bogomipsMatch = modelOut.match(/BogoMIPS:\s+([\d.]+)/);
+      if (bogomipsMatch) {
+        this.cpuBogomipsValue.set_label(bogomipsMatch[1].trim());
       }
       
       // Get max frequency
@@ -145,8 +258,9 @@ export class CpuComponent {
         this.cpuFrequencyValue.set_label('N/A');
       }
       
-      // Redraw chart
+      // Redraw charts
       this.cpuChart.queue_draw();
+      this.cpuPerCoreChart.queue_draw();
     } catch (error) {
       console.error('Error updating CPU data:', error);
     }
@@ -154,15 +268,52 @@ export class CpuComponent {
 
   private getCpuUsage(): number {
     try {
-      const [topOut] = this.utils.executeCommand('top', ['-bn1']);
-      const cpuLine = topOut.split('\n').find(line => line.includes('%Cpu(s)'));
+      const [stdout] = this.utils.executeCommand('cat', ['/proc/stat']);
+      const lines = stdout.split('\n');
+      const cpuLine = lines.find(line => line.startsWith('cpu '));
       
-      if (cpuLine) {
-        const idleMatch = cpuLine.match(/([\d.]+)\s*id/);
-        if (idleMatch) {
-          const idle = parseFloat(idleMatch[1]);
-          return 100 - idle;
+      // Get per-core usage
+      const cpuLines = lines.filter(line => /^cpu\d+/.test(line));
+      this.numCores = cpuLines.length;
+      
+      if (this.perCoreUsage.length === 0) {
+        this.perCoreUsage = new Array(this.numCores).fill(0);
+        this.prevCoreIdle = new Array(this.numCores).fill(0);
+        this.prevCoreTotal = new Array(this.numCores).fill(0);
+      }
+      
+      cpuLines.forEach((line, index) => {
+        const values = line.split(/\s+/).slice(1).map(v => parseInt(v));
+        const idle = values[3] + values[4]; // idle + iowait
+        const total = values.reduce((a, b) => a + b, 0);
+        
+        if (this.prevCoreTotal[index] !== 0) {
+          const diffIdle = idle - this.prevCoreIdle[index];
+          const diffTotal = total - this.prevCoreTotal[index];
+          this.perCoreUsage[index] = diffTotal > 0 ? ((diffTotal - diffIdle) / diffTotal) * 100 : 0;
         }
+        
+        this.prevCoreIdle[index] = idle;
+        this.prevCoreTotal[index] = total;
+      });
+      
+      // Get overall usage
+      if (cpuLine) {
+        const values = cpuLine.split(/\s+/).slice(1).map(v => parseInt(v));
+        const idle = values[3] + values[4]; // idle + iowait
+        const total = values.reduce((a, b) => a + b, 0);
+        
+        if (this.prevTotal !== 0) {
+          const diffIdle = idle - this.prevIdle;
+          const diffTotal = total - this.prevTotal;
+          const usage = diffTotal > 0 ? ((diffTotal - diffIdle) / diffTotal) * 100 : 0;
+          this.prevIdle = idle;
+          this.prevTotal = total;
+          return usage;
+        }
+        
+        this.prevIdle = idle;
+        this.prevTotal = total;
       }
     } catch (error) {
       console.error('Error getting CPU usage:', error);
@@ -230,6 +381,94 @@ export class CpuComponent {
     cr.setFontSize(10);
     
     // Y-axis labels
+    for (let i = 0; i <= 4; i++) {
+      const y = padding + (chartHeight * i / 4);
+      const label = `${100 - (i * 25)}%`;
+      cr.moveTo(5, y + 3);
+      cr.showText(label);
+    }
+  }
+
+  private drawPerCoreChart(cr: any, width: number, height: number): void {
+    if (this.numCores === 0) return;
+    
+    const padding = 20;
+    const chartWidth = width - 2 * padding;
+    const chartHeight = height - 2 * padding;
+    
+    // Clear background
+    cr.setSourceRGBA(0, 0, 0, 0);
+    cr.paint();
+    
+    // Draw grid lines
+    cr.setSourceRGBA(0.8, 0.8, 0.8, 0.5);
+    cr.setLineWidth(1);
+    
+    // Horizontal grid lines
+    for (let i = 0; i <= 4; i++) {
+      const y = padding + (chartHeight * i / 4);
+      cr.moveTo(padding, y);
+      cr.lineTo(width - padding, y);
+      cr.stroke();
+    }
+    
+    // Draw axes
+    cr.setSourceRGB(0.5, 0.5, 0.5);
+    cr.setLineWidth(2);
+    cr.moveTo(padding, padding);
+    cr.lineTo(padding, height - padding);
+    cr.lineTo(width - padding, height - padding);
+    cr.stroke();
+    
+    // Calculate bar dimensions
+    const barSpacing = 4;
+    const totalSpacing = barSpacing * (this.numCores - 1);
+    const barWidth = (chartWidth - totalSpacing) / this.numCores;
+    
+    // Draw bars for each core
+    for (let i = 0; i < this.numCores; i++) {
+      const x = padding + (barWidth + barSpacing) * i;
+      const usage = this.perCoreUsage[i] || 0;
+      const barHeight = (usage / 100) * chartHeight;
+      const y = height - padding - barHeight;
+      
+      // Color gradient based on usage
+      if (usage < 50) {
+        cr.setSourceRGB(0.2, 0.8, 0.4); // Green
+      } else if (usage < 80) {
+        cr.setSourceRGB(0.9, 0.7, 0.2); // Yellow
+      } else {
+        cr.setSourceRGB(0.9, 0.3, 0.3); // Red
+      }
+      
+      cr.rectangle(x, y, barWidth, barHeight);
+      cr.fill();
+      
+      // Draw usage percentage on top of bar
+      cr.setSourceRGB(0.3, 0.3, 0.3);
+      cr.selectFontFace('Sans', 0, 0);
+      cr.setFontSize(9);
+      const usageText = `${usage.toFixed(0)}%`;
+      const textExtents = cr.textExtents(usageText);
+      const textX = x + (barWidth - textExtents.width) / 2;
+      const textY = y - 4;
+      if (textY > padding) {
+        cr.moveTo(textX, textY);
+        cr.showText(usageText);
+      }
+      
+      // Draw core label below bar (starting from 1)
+      cr.setFontSize(8);
+      const coreLabel = `${i + 1}`;
+      const labelExtents = cr.textExtents(coreLabel);
+      const labelX = x + (barWidth - labelExtents.width) / 2;
+      cr.moveTo(labelX, height - padding + 12);
+      cr.showText(coreLabel);
+    }
+    
+    // Draw Y-axis labels
+    cr.setSourceRGB(0.3, 0.3, 0.3);
+    cr.setFontSize(10);
     for (let i = 0; i <= 4; i++) {
       const y = padding + (chartHeight * i / 4);
       const label = `${100 - (i * 25)}%`;

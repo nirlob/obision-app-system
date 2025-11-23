@@ -288,7 +288,8 @@ if (fs.existsSync(resourcesComponentFile)) {
         resourcesContent = resourcesContent.substring(classStartIndex);
     }
 
-    resourcesContent = cleanJSContent(resourcesContent);
+    resourcesContent = cleanJSContent(resourcesContent)
+        .replace(/utils_service_1\./g, '');
     combinedContent += resourcesContent + '\n';
 }
 

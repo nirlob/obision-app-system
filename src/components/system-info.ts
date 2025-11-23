@@ -149,14 +149,14 @@ export class SystemInfoComponent {
           case 'Memory':
             title = 'Memory';
             const memPct = result.total !== undefined ? `(${(result.used * 100 / result.total).toFixed(1)}%)` : '';
-            subtitle = `${this.formatBytes(result.used || 0)} / ${this.formatBytes(result.total || 0)} ${memPct}`;
+            subtitle = `${this.utils.formatBytes(result.used || 0)} / ${this.utils.formatBytes(result.total || 0)} ${memPct}`;
             icon = 'auth-sim-symbolic';
             break;
           case 'Swap':
             title = 'Swap';
             if (result.total > 0) {
               const swapPct = `(${(result.used * 100 / result.total).toFixed(1)}%)`;
-              subtitle = `${this.formatBytes(result.used || 0)} / ${this.formatBytes(result.total || 0)} ${swapPct}`;
+              subtitle = `${this.utils.formatBytes(result.used || 0)} / ${this.utils.formatBytes(result.total || 0)} ${swapPct}`;
             } else {
               subtitle = 'No swap space configured';
             }
@@ -165,7 +165,7 @@ export class SystemInfoComponent {
           case 'Disk':
             title = 'Mount points';
             result.forEach((mount: { mountpoint: any; bytes: any; }, index: number) => {
-              subtitle += `${mount.mountpoint} - ${this.formatBytes(mount.bytes.used || 0)} / ${this.formatBytes(mount.bytes.total || 0)}`;
+              subtitle += `${mount.mountpoint} - ${this.utils.formatBytes(mount.bytes.used || 0)} / ${this.utils.formatBytes(mount.bytes.total || 0)}`;
               if (index < result.length - 1) {
                 subtitle += '\n';
               }
@@ -233,17 +233,6 @@ export class SystemInfoComponent {
     if (mins > 0) parts.push(`${mins} mins`);
     
     return parts.join(', ') || '0 mins';
-  }
-
-  private formatBytes(bytes: number): string {
-    if (bytes >= 1024 * 1024 * 1024) {
-      return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GiB`;
-    } else if (bytes >= 1024 * 1024) {
-      return `${(bytes / (1024 * 1024)).toFixed(2)} MiB`;
-    } else if (bytes >= 1024) {
-      return `${(bytes / 1024).toFixed(2)} KiB`;
-    }
-    return `${bytes} B`;
   }
 
   public getWidget(): Gtk.Box {

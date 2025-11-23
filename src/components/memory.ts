@@ -14,6 +14,16 @@ export class MemoryComponent {
   private memorySwapTotalValue!: Gtk.Label;
   private memorySwapUsedValue!: Gtk.Label;
   private memoryUsageValue!: Gtk.Label;
+  private memorySharedValue!: Gtk.Label;
+  private memorySlabValue!: Gtk.Label;
+  private memoryActiveValue!: Gtk.Label;
+  private memoryInactiveValue!: Gtk.Label;
+  private memoryDirtyValue!: Gtk.Label;
+  private memoryWritebackValue!: Gtk.Label;
+  private memoryMappedValue!: Gtk.Label;
+  private memoryPageTablesValue!: Gtk.Label;
+  private memoryKernelStackValue!: Gtk.Label;
+  private memorySwapCachedValue!: Gtk.Label;
   private updateTimeoutId: number | null = null;
   private utils: UtilsService;
   private usageHistory: number[] = [];
@@ -49,6 +59,16 @@ export class MemoryComponent {
     this.memorySwapTotalValue = builder.get_object('memory_swap_total_value') as Gtk.Label;
     this.memorySwapUsedValue = builder.get_object('memory_swap_used_value') as Gtk.Label;
     this.memoryUsageValue = builder.get_object('memory_usage_value') as Gtk.Label;
+    this.memorySharedValue = builder.get_object('memory_shared_value') as Gtk.Label;
+    this.memorySlabValue = builder.get_object('memory_slab_value') as Gtk.Label;
+    this.memoryActiveValue = builder.get_object('memory_active_value') as Gtk.Label;
+    this.memoryInactiveValue = builder.get_object('memory_inactive_value') as Gtk.Label;
+    this.memoryDirtyValue = builder.get_object('memory_dirty_value') as Gtk.Label;
+    this.memoryWritebackValue = builder.get_object('memory_writeback_value') as Gtk.Label;
+    this.memoryMappedValue = builder.get_object('memory_mapped_value') as Gtk.Label;
+    this.memoryPageTablesValue = builder.get_object('memory_pagetables_value') as Gtk.Label;
+    this.memoryKernelStackValue = builder.get_object('memory_kernelstack_value') as Gtk.Label;
+    this.memorySwapCachedValue = builder.get_object('memory_swap_cached_value') as Gtk.Label;
     
     // Initialize history with zeros
     for (let i = 0; i < this.maxHistoryPoints; i++) {
@@ -81,7 +101,7 @@ export class MemoryComponent {
       for (const line of lines) {
         if (line.startsWith('MemTotal:')) {
           const kb = parseInt(line.split(/\s+/)[1]);
-          this.memoryTotalValue.set_label(this.formatBytes(kb * 1024));
+          this.memoryTotalValue.set_label(this.utils.formatBytes(kb * 1024));
         }
       }
     } catch (error) {
@@ -101,19 +121,41 @@ export class MemoryComponent {
       let buffers = 0;
       let swapTotal = 0;
       let swapFree = 0;
+      let shared = 0;
+      let slab = 0;
+      let active = 0;
+      let inactive = 0;
+      let dirty = 0;
+      let writeback = 0;
+      let mapped = 0;
+      let pageTables = 0;
+      let kernelStack = 0;
+      let swapCached = 0;
       
       for (const line of lines) {
         const parts = line.split(/\s+/);
         const key = parts[0];
         const value = parseInt(parts[1]) || 0;
         
-        if (key === 'MemTotal:') memTotal = value;
-        else if (key === 'MemFree:') memFree = value;
-        else if (key === 'MemAvailable:') memAvailable = value;
-        else if (key === 'Cached:') cached = value;
-        else if (key === 'Buffers:') buffers = value;
-        else if (key === 'SwapTotal:') swapTotal = value;
-        else if (key === 'SwapFree:') swapFree = value;
+        switch (key) {
+          case 'MemTotal:': memTotal = value; break;
+          case 'MemFree:': memFree = value; break;
+          case 'MemAvailable:': memAvailable = value; break;
+          case 'Cached:': cached = value; break;
+          case 'Buffers:': buffers = value; break;
+          case 'SwapTotal:': swapTotal = value; break;
+          case 'SwapFree:': swapFree = value; break;
+          case 'Shmem:': shared = value; break;
+          case 'Slab:': slab = value; break;
+          case 'Active:': active = value; break;
+          case 'Inactive:': inactive = value; break;
+          case 'Dirty:': dirty = value; break;
+          case 'Writeback:': writeback = value; break;
+          case 'Mapped:': mapped = value; break;
+          case 'PageTables:': pageTables = value; break;
+          case 'KernelStack:': kernelStack = value; break;
+          case 'SwapCached:': swapCached = value; break;
+        }
       }
       
       // Calculate used memory
@@ -124,14 +166,24 @@ export class MemoryComponent {
       const usagePercentage = memTotal > 0 ? (memUsed / memTotal) * 100 : 0;
       
       // Update labels
-      this.memoryUsedValue.set_label(this.formatBytes(memUsed * 1024));
-      this.memoryFreeValue.set_label(this.formatBytes(memFree * 1024));
-      this.memoryAvailableValue.set_label(this.formatBytes(memAvailable * 1024));
-      this.memoryCachedValue.set_label(this.formatBytes(cached * 1024));
-      this.memoryBuffersValue.set_label(this.formatBytes(buffers * 1024));
-      this.memorySwapTotalValue.set_label(this.formatBytes(swapTotal * 1024));
-      this.memorySwapUsedValue.set_label(this.formatBytes(swapUsed * 1024));
+      this.memoryUsedValue.set_label(this.utils.formatBytes(memUsed * 1024));
+      this.memoryFreeValue.set_label(this.utils.formatBytes(memFree * 1024));
+      this.memoryAvailableValue.set_label(this.utils.formatBytes(memAvailable * 1024));
+      this.memoryCachedValue.set_label(this.utils.formatBytes(cached * 1024));
+      this.memoryBuffersValue.set_label(this.utils.formatBytes(buffers * 1024));
+      this.memorySwapTotalValue.set_label(this.utils.formatBytes(swapTotal * 1024));
+      this.memorySwapUsedValue.set_label(this.utils.formatBytes(swapUsed * 1024));
       this.memoryUsageValue.set_label(`${usagePercentage.toFixed(1)}%`);
+      this.memorySharedValue.set_label(this.utils.formatBytes(shared * 1024));
+      this.memorySlabValue.set_label(this.utils.formatBytes(slab * 1024));
+      this.memoryActiveValue.set_label(this.utils.formatBytes(active * 1024));
+      this.memoryInactiveValue.set_label(this.utils.formatBytes(inactive * 1024));
+      this.memoryDirtyValue.set_label(this.utils.formatBytes(dirty * 1024));
+      this.memoryWritebackValue.set_label(this.utils.formatBytes(writeback * 1024));
+      this.memoryMappedValue.set_label(this.utils.formatBytes(mapped * 1024));
+      this.memoryPageTablesValue.set_label(this.utils.formatBytes(pageTables * 1024));
+      this.memoryKernelStackValue.set_label(this.utils.formatBytes(kernelStack * 1024));
+      this.memorySwapCachedValue.set_label(this.utils.formatBytes(swapCached * 1024));
       
       // Update history
       this.usageHistory.push(usagePercentage);
@@ -144,16 +196,6 @@ export class MemoryComponent {
     } catch (error) {
       console.error('Error updating memory data:', error);
     }
-  }
-
-  private formatBytes(bytes: number): string {
-    if (bytes === 0) return '0 B';
-    
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    
-    return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`;
   }
 
   private drawLineChart(cr: any, width: number, height: number): void {
