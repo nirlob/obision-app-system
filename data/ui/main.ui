@@ -188,6 +188,36 @@
                             <property name="margin-bottom">8</property>
                             <child>
                               <object class="GtkImage">
+                                <property name="icon-name">drive-multidisk-symbolic</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="label" translatable="yes">Disk</property>
+                                <property name="halign">start</property>
+                                <property name="hexpand">true</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="menu_option_5">
+                        <property name="halign">fill</property>
+                        <style>
+                          <class name="flat"/>
+                        </style>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="orientation">horizontal</property>
+                            <property name="spacing">12</property>
+                            <property name="margin-start">6</property>
+                            <property name="margin-end">6</property>
+                            <property name="margin-top">8</property>
+                            <property name="margin-bottom">8</property>
+                            <child>
+                              <object class="GtkImage">
                                 <property name="icon-name">network-wired-symbolic</property>
                               </object>
                             </child>
@@ -203,7 +233,7 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkButton" id="menu_option_5">
+                      <object class="GtkButton" id="menu_option_6">
                         <property name="halign">fill</property>
                         <style>
                           <class name="flat"/>
@@ -242,7 +272,7 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkButton" id="menu_option_6">
+                      <object class="GtkButton" id="menu_option_7">
                         <property name="halign">fill</property>
                         <style>
                           <class name="flat"/>
@@ -272,7 +302,7 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkButton" id="menu_option_7">
+                      <object class="GtkButton" id="menu_option_8">
                         <property name="halign">fill</property>
                         <style>
                           <class name="flat"/>
@@ -302,7 +332,7 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkButton" id="menu_option_8">
+                      <object class="GtkButton" id="menu_option_9">
                         <property name="halign">fill</property>
                         <style>
                           <class name="flat"/>
@@ -332,7 +362,7 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkButton" id="menu_option_9">
+                      <object class="GtkButton" id="menu_option_10">
                         <property name="halign">fill</property>
                         <style>
                           <class name="flat"/>
@@ -353,6 +383,36 @@
                             <child>
                               <object class="GtkLabel">
                                 <property name="label" translatable="yes">Drivers</property>
+                                <property name="halign">start</property>
+                                <property name="hexpand">true</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="menu_option_11">
+                        <property name="halign">fill</property>
+                        <style>
+                          <class name="flat"/>
+                        </style>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="orientation">horizontal</property>
+                            <property name="spacing">12</property>
+                            <property name="margin-start">6</property>
+                            <property name="margin-end">6</property>
+                            <property name="margin-top">8</property>
+                            <property name="margin-bottom">8</property>
+                            <child>
+                              <object class="GtkImage">
+                                <property name="icon-name">text-x-generic-symbolic</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="label" translatable="yes">Logs</property>
                                 <property name="halign">start</property>
                                 <property name="hexpand">true</property>
                               </object>

@@ -229,6 +229,22 @@ if (fs.existsSync(memoryComponentFile)) {
     combinedContent += memoryContent + '\n';
 }
 
+// Add Disk component
+const diskComponentFile = path.join(BUILD_DIR, 'components', 'disk.js');
+if (fs.existsSync(diskComponentFile)) {
+    console.log('📋 Adding DiskComponent...');
+    let diskContent = fs.readFileSync(diskComponentFile, 'utf8');
+
+    const classStartIndex = diskContent.indexOf('class DiskComponent {');
+    if (classStartIndex !== -1) {
+        diskContent = diskContent.substring(classStartIndex);
+    }
+
+    diskContent = cleanJSContent(diskContent)
+        .replace(/utils_service_1\./g, '');
+    combinedContent += diskContent + '\n';
+}
+
 // Add Network component
 const networkComponentFile = path.join(BUILD_DIR, 'components', 'network.js');
 if (fs.existsSync(networkComponentFile)) {
@@ -324,6 +340,22 @@ if (fs.existsSync(driversComponentFile)) {
     combinedContent += driversContent + '\n';
 }
 
+// Add Logs component
+const logsComponentFile = path.join(BUILD_DIR, 'components', 'logs.js');
+if (fs.existsSync(logsComponentFile)) {
+    console.log('📋 Adding LogsComponent...');
+    let logsContent = fs.readFileSync(logsComponentFile, 'utf8');
+
+    const classStartIndex = logsContent.indexOf('class LogsComponent {');
+    if (classStartIndex !== -1) {
+        logsContent = logsContent.substring(classStartIndex);
+    }
+
+    logsContent = cleanJSContent(logsContent)
+        .replace(/utils_service_1\./g, '');
+    combinedContent += logsContent + '\n';
+}
+
 // Add ApplicationsList component
 const applicationsListFile = path.join(BUILD_DIR, 'components', 'applications-list.js');
 if (fs.existsSync(applicationsListFile)) {
@@ -365,12 +397,14 @@ if (fs.existsSync(mainJsFile)) {
         .replace(/cpu_1\./g, '')
         .replace(/gpu_1\./g, '')
         .replace(/memory_1\./g, '')
+        .replace(/disk_1\./g, '')
         .replace(/network_1\./g, '')
         .replace(/system_info_1\./g, '')
         .replace(/resources_1\./g, '')
         .replace(/processes_1\./g, '')
         .replace(/services_1\./g, '')
         .replace(/drivers_1\./g, '')
+        .replace(/logs_1\./g, '')
         .replace(/applications_list_js_1\.ApplicationsList/g, 'ApplicationsList')
         .replace(/applications_list_js_1\./g, '')
         .replace(/install_dialog_js_1\./g, '')

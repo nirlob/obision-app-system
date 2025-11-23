@@ -6,12 +6,14 @@ import { ResumeComponent } from './components/resume';
 import { CpuComponent } from './components/cpu';
 import { GpuComponent } from './components/gpu';
 import { MemoryComponent } from './components/memory';
+import { DiskComponent } from './components/disk';
 import { NetworkComponent } from './components/network';
 import { SystemInfoComponent } from './components/system-info';
 import { ResourcesComponent } from './components/resources';
 import { ProcessesComponent } from './components/processes';
 import { ServicesComponent } from './components/services';
 import { DriversComponent } from './components/drivers';
+import { LogsComponent } from './components/logs';
 
 class ObisionStatusApplication {
   private application: Adw.Application;
@@ -117,12 +119,12 @@ class ObisionStatusApplication {
     const menuButton3 = builder.get_object('menu_option_3') as Gtk.Button;
     const menuButton4 = builder.get_object('menu_option_4') as Gtk.Button;
     const menuButton5 = builder.get_object('menu_option_5') as Gtk.Button;
-    const menuButton6 = builder.get_object('menu_option_6') as Gtk.Button;
-    const menuButton7 = builder.get_object('menu_option_7') as Gtk.Button;
-    const menuButton8 = builder.get_object('menu_option_8') as Gtk.Button;
-    const menuButton9 = builder.get_object('menu_option_9') as Gtk.Button;
-
-    // Setup navigation
+        const menuButton6 = builder.get_object('menu_option_6') as Gtk.Button;
+        const menuButton7 = builder.get_object('menu_option_7') as Gtk.Button;
+        const menuButton8 = builder.get_object('menu_option_8') as Gtk.Button;
+        const menuButton9 = builder.get_object('menu_option_9') as Gtk.Button;
+        const menuButton10 = builder.get_object('menu_option_10') as Gtk.Button;
+        const menuButton11 = builder.get_object('menu_option_11') as Gtk.Button;    // Setup navigation
     menuButton0.connect('clicked', () => {
       this.onNavigationItemSelected(0, mainContent);
     });
@@ -152,6 +154,12 @@ class ObisionStatusApplication {
     });
     menuButton9.connect('clicked', () => {
       this.onNavigationItemSelected(9, mainContent);
+    });
+    menuButton10.connect('clicked', () => {
+      this.onNavigationItemSelected(10, mainContent);
+    });
+    menuButton11.connect('clicked', () => {
+      this.onNavigationItemSelected(11, mainContent);
     });
 
     // Show first view by default
@@ -183,23 +191,29 @@ class ObisionStatusApplication {
       case 3: // Memory
         this.showMemory(contentBox);
         break;
-      case 4: // Network
+      case 4: // Disk
+        this.showDisk(contentBox);
+        break;
+      case 5: // Network
         this.showNetwork(contentBox);
         break;
-      case 5: // System Info
+      case 6: // System Info
         this.showSystemInfo(contentBox);
         break;
-      case 6: // Resources
+      case 7: // Resources
         this.showResources(contentBox);
         break;
-      case 7: // Processes
+      case 8: // Processes
         this.showProcesses(contentBox);
         break;
-      case 8: // Services
+      case 9: // Services
         this.showServices(contentBox);
         break;
-      case 9: // Drivers
+      case 10: // Drivers
         this.showDrivers(contentBox);
+        break;
+      case 11: // Logs
+        this.showLogs(contentBox);
         break;
     }
   }
@@ -220,8 +234,13 @@ class ObisionStatusApplication {
   }
 
   private showMemory(contentBox: Gtk.Box): void {
-    const component = new MemoryComponent();
-    contentBox.append(component.getWidget());
+    const memoryComponent = new MemoryComponent();
+    contentBox.append(memoryComponent.getWidget());
+  }
+
+  private showDisk(contentBox: Gtk.Box): void {
+    const diskComponent = new DiskComponent();
+    contentBox.append(diskComponent.getWidget());
   }
 
   private showNetwork(contentBox: Gtk.Box): void {
@@ -251,6 +270,11 @@ class ObisionStatusApplication {
 
   private showDrivers(contentBox: Gtk.Box): void {
     const component = new DriversComponent();
+    contentBox.append(component.getWidget());
+  }
+
+  private showLogs(contentBox: Gtk.Box): void {
+    const component = new LogsComponent();
     contentBox.append(component.getWidget());
   }
 

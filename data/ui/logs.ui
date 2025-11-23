@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  
+  <object class="GtkBox" id="logs_container">
+    <property name="orientation">vertical</property>
+    <property name="spacing">12</property>
+    <property name="margin-start">24</property>
+    <property name="margin-end">24</property>
+    <property name="margin-top">24</property>
+    <property name="margin-bottom">24</property>
+    
+    <!-- Header with controls -->
+    <child>
+      <object class="GtkBox">
+        <property name="orientation">horizontal</property>
+        <property name="spacing">12</property>
+        
+        <child>
+          <object class="GtkLabel">
+            <property name="label">System and Application Logs</property>
+            <property name="halign">start</property>
+            <property name="hexpand">true</property>
+            <property name="css-classes">title-3</property>
+          </object>
+        </child>
+        
+        <child>
+          <object class="GtkButton" id="refresh_button">
+            <property name="icon-name">media-playback-start-symbolic</property>
+            <property name="tooltip-text">Enable Auto-refresh</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    
+    <!-- Notebook for tabs -->
+    <child>
+      <object class="GtkNotebook" id="notebook">
+        <property name="vexpand">true</property>
+        <property name="hexpand">true</property>
+        <property name="show-tabs">true</property>
+        <property name="show-border">false</property>
+      </object>
+    </child>
+  </object>
+</interface>

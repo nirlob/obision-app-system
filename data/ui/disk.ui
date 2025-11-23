@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <requires lib="libadwaita" version="1.0"/>
+  
+  <object class="GtkBox" id="disk_container">
+    <property name="orientation">vertical</property>
+    <property name="spacing">12</property>
+    <property name="margin-start">24</property>
+    <property name="margin-end">24</property>
+    <property name="margin-top">24</property>
+    <property name="margin-bottom">24</property>
+    
+    <!-- Chart Section -->
+    <child>
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <property name="spacing">12</property>
+        
+        <child>
+          <object class="GtkLabel">
+            <property name="label">Disk I/O Activity</property>
+            <property name="halign">start</property>
+            <property name="css-classes">title-3</property>
+          </object>
+        </child>
+        
+        <child>
+          <object class="GtkDrawingArea" id="disk_chart">
+            <property name="width-request">600</property>
+            <property name="height-request">200</property>
+            <property name="hexpand">true</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    
+    <!-- Disk Usage Section -->
+    <child>
+      <object class="GtkScrolledWindow">
+        <property name="vexpand">true</property>
+        <property name="hexpand">true</property>
+        <property name="hscrollbar-policy">never</property>
+        
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">vertical</property>
+            <property name="spacing">18</property>
+            
+            <!-- Mounted Filesystems -->
+            <child>
+              <object class="AdwPreferencesGroup" id="disk_filesystems_group">
+                <property name="title">Mounted Filesystems</property>
+                <property name="description">Disk usage by partition</property>
+              </object>
+            </child>
+            
+            <!-- I/O Statistics -->
+            <child>
+              <object class="AdwPreferencesGroup" id="disk_io_group">
+                <property name="title">I/O Statistics</property>
+                <property name="description">Read and write speeds</property>
+                
+                <child>
+                  <object class="AdwActionRow" id="read_speed_row">
+                    <property name="title">Read Speed</property>
+                    <child>
+                      <object class="GtkLabel" id="read_speed_label">
+                        <property name="label">0 MB/s</property>
+                        <property name="css-classes">dim-label</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                
+                <child>
+                  <object class="AdwActionRow" id="write_speed_row">
+                    <property name="title">Write Speed</property>
+                    <child>
+                      <object class="GtkLabel" id="write_speed_label">
+                        <property name="label">0 MB/s</property>
+                        <property name="css-classes">dim-label</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                
+                <child>
+                  <object class="AdwActionRow" id="total_read_row">
+                    <property name="title">Total Read</property>
+                    <child>
+                      <object class="GtkLabel" id="total_read_label">
+                        <property name="label">0 GB</property>
+                        <property name="css-classes">dim-label</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                
+                <child>
+                  <object class="AdwActionRow" id="total_write_row">
+                    <property name="title">Total Written</property>
+                    <child>
+                      <object class="GtkLabel" id="total_write_label">
+                        <property name="label">0 GB</property>
+                        <property name="css-classes">dim-label</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>
