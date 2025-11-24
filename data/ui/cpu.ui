@@ -5,7 +5,7 @@
     <property name="spacing">0</property>
     <property name="vexpand">true</property>
     <property name="hexpand">true</property>
-    
+
     <!-- Chart Section -->
     <child>
       <object class="GtkBox">
@@ -19,7 +19,7 @@
             <property name="spacing">12</property>
             <child>
               <object class="GtkLabel">
-                <property name="label">CPU Load</property>
+                <property name="label">Load History</property>
                 <property name="halign">start</property>
                 <property name="hexpand">true</property>
                 <attributes>
@@ -51,6 +51,7 @@
             </child>
           </object>
         </child>
+        <!-- Chart Section -->
         <child>
           <object class="GtkStack" id="chart_stack">
             <property name="vexpand">false</property>
@@ -101,13 +102,54 @@
         </child>
       </object>
     </child>
-    
+
+    <!-- CPU Usage Progress Bar Title and Percent -->
+    <child>
+      <object class="GtkBox" id="cpu_usage_title_box">
+        <property name="orientation">horizontal</property>
+        <property name="hexpand">true</property>
+        <property name="margin-top">8</property>
+        <child>
+          <object class="GtkLabel" id="cpu_usage_title">
+            <property name="label">Load Actual</property>
+            <property name="halign">start</property>
+            <property name="hexpand">true</property>
+            <attributes>
+              <attribute name="weight" value="bold"/>
+            </attributes>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel" id="cpu_usage_percent">
+            <property name="label">0.0%</property>
+            <property name="halign">end</property>
+            <property name="hexpand">false</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="GtkLevelBar" id="cpu_usage_bar">
+        <property name="hexpand">true</property>
+        <property name="vexpand">false</property>
+        <property name="min-value">0</property>
+        <property name="max-value">1</property>
+        <property name="value">0</property>
+        <property name="mode">continuous</property>
+        <property name="margin-top">12</property>
+        <style>
+          <class name="cpu-bar"/>
+        </style>
+      </object>
+    </child>
+
     <!-- CPU Information Section -->
     <child>
       <object class="GtkBox">
         <property name="orientation">vertical</property>
         <property name="spacing">12</property>
-        
+        <property name="margin-top">6</property>
+
         <!-- CPU Info Title -->
         <child>
           <object class="GtkLabel">
@@ -120,7 +162,7 @@
             </attributes>
           </object>
         </child>
-        
+
         <child>
           <object class="GtkScrolledWindow">
             <property name="vexpand">true</property>

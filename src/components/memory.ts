@@ -5,6 +5,9 @@ import { UtilsService } from '../services/utils-service';
 export class MemoryComponent {
   private container: Gtk.Box;
   private memoryChart!: Gtk.DrawingArea;
+  private memoryUsageBar!: Gtk.LevelBar;
+  private memoryUsageTitle!: Gtk.Label;
+  private memoryUsagePercent!: Gtk.Label;
   private memoryTotalValue!: Gtk.Label;
   private memoryUsedValue!: Gtk.Label;
   private memoryFreeValue!: Gtk.Label;
@@ -50,6 +53,9 @@ export class MemoryComponent {
 
     this.container = builder.get_object('memory_container') as Gtk.Box;
     this.memoryChart = builder.get_object('memory_chart') as Gtk.DrawingArea;
+    this.memoryUsageBar = builder.get_object('memory_usage_bar') as Gtk.LevelBar;
+    this.memoryUsageTitle = builder.get_object('memory_usage_title') as Gtk.Label;
+    this.memoryUsagePercent = builder.get_object('memory_usage_percent') as Gtk.Label;
     this.memoryTotalValue = builder.get_object('memory_total_value') as Gtk.Label;
     this.memoryUsedValue = builder.get_object('memory_used_value') as Gtk.Label;
     this.memoryFreeValue = builder.get_object('memory_free_value') as Gtk.Label;
@@ -185,6 +191,18 @@ export class MemoryComponent {
       this.memoryKernelStackValue.set_label(this.utils.formatBytes(kernelStack * 1024));
       this.memorySwapCachedValue.set_label(this.utils.formatBytes(swapCached * 1024));
       
+      // Update progress bar (0.0 to 1.0)
+      if (this.memoryUsageBar) {
+        this.memoryUsageBar.set_value(Math.min(1, Math.max(0, memTotal > 0 ? memUsed / memTotal : 0)));
+      }
+      // Update usage title and percent
+      if (this.memoryUsageTitle) {
+        this.memoryUsageTitle.set_label('Usage Actual');
+      }
+      if (this.memoryUsagePercent) {
+        this.memoryUsagePercent.set_label(`${usagePercentage.toFixed(1)}%`);
+      }
+
       // Update history
       this.usageHistory.push(usagePercentage);
       if (this.usageHistory.length > this.maxHistoryPoints) {

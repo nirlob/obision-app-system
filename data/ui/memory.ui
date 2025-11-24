@@ -30,12 +30,51 @@
             </child>
           </object>
         </child>
+        <!-- Memory Usage Progress Bar Title and Bar below chart -->
+        <child>
+          <object class="GtkBox" id="memory_usage_title_box">
+            <property name="orientation">horizontal</property>
+            <property name="hexpand">true</property>
+            <!-- <property name="margin-top">8</property> -->
+            <child>
+              <object class="GtkLabel" id="memory_usage_title">
+                <property name="label">Usage Actual</property>
+                <property name="halign">start</property>
+                <property name="hexpand">true</property>
+                <attributes>
+                  <attribute name="weight" value="bold"/>
+                </attributes>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel" id="memory_usage_percent">
+                <property name="label">0.0%</property>
+                <property name="halign">end</property>
+                <property name="hexpand">false</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLevelBar" id="memory_usage_bar">
+            <property name="hexpand">true</property>
+            <property name="vexpand">false</property>
+            <property name="min-value">0</property>
+            <property name="max-value">1</property>
+            <property name="value">0</property>
+            <property name="mode">continuous</property>
+            <style>
+              <class name="memory-bar"/>
+            </style>
+          </object>
+        </child>
       </object>
     </child>
     <child>
       <object class="GtkBox">
         <property name="orientation">vertical</property>
         <property name="spacing">12</property>
+        <property name="margin-top">6</property>
         <child>
           <object class="GtkLabel">
             <property name="label" translatable="yes">Information</property>

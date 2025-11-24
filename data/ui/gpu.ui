@@ -40,32 +40,34 @@
     </child>
     
     <!-- GPU Information Section -->
+    <!-- GPU Info Title outside scroll -->
+    <child>
+      <object class="GtkLabel">
+        <property name="label">Information</property>
+        <property name="halign">start</property>
+        <property name="hexpand">true</property>
+        <property name="margin-top">12</property>
+        <property name="margin-bottom">12</property>
+        <attributes>
+          <attribute name="weight" value="bold"/>
+        </attributes>
+      </object>
+    </child>
     <child>
       <object class="GtkScrolledWindow">
         <property name="vexpand">true</property>
         <property name="hexpand">true</property>
+        <property name="margin-top">0</property>
         <child>
           <object class="GtkBox">
             <property name="orientation">vertical</property>
             <property name="spacing">12</property>
-            
-            <!-- GPU Info Title -->
-            <child>
-              <object class="GtkLabel">
-                <property name="label">Information</property>
-                <property name="halign">start</property>
-                <property name="hexpand">true</property>
-                <attributes>
-                  <attribute name="weight" value="bold"/>
-                </attributes>
-              </object>
-            </child>
-            
             <child>
               <object class="AdwPreferencesGroup">
                 <child>
                   <object class="AdwActionRow">
                     <property name="title" translatable="yes">Name</property>
+                    <property name="subtitle">GPU model or identifier</property>
                     <child>
                       <object class="GtkLabel" id="gpu_name_value">
                         <property name="label">-</property>
@@ -79,6 +81,7 @@
                 <child>
                   <object class="AdwActionRow">
                     <property name="title" translatable="yes">Driver</property>
+                    <property name="subtitle">Kernel module in use</property>
                     <child>
                       <object class="GtkLabel" id="gpu_driver_value">
                         <property name="label">-</property>
@@ -92,6 +95,7 @@
                 <child>
                   <object class="AdwActionRow">
                     <property name="title" translatable="yes">Memory Total</property>
+                    <property name="subtitle">Physical GPU memory available</property>
                     <child>
                       <object class="GtkLabel" id="gpu_memory_total_value">
                         <property name="label">-</property>
@@ -105,6 +109,7 @@
                 <child>
                   <object class="AdwActionRow">
                     <property name="title" translatable="yes">Memory Used</property>
+                    <property name="subtitle">Currently allocated GPU memory</property>
                     <child>
                       <object class="GtkLabel" id="gpu_memory_used_value">
                         <property name="label">-</property>
@@ -118,6 +123,7 @@
                 <child>
                   <object class="AdwActionRow">
                     <property name="title" translatable="yes">Current Usage</property>
+                    <property name="subtitle">GPU load at this moment</property>
                     <child>
                       <object class="GtkLabel" id="gpu_usage_value">
                         <property name="label">-</property>
@@ -131,6 +137,7 @@
                 <child>
                   <object class="AdwActionRow">
                     <property name="title" translatable="yes">Temperature</property>
+                    <property name="subtitle">Current GPU temperature</property>
                     <child>
                       <object class="GtkLabel" id="gpu_temperature_value">
                         <property name="label">-</property>
@@ -144,6 +151,7 @@
                 <child>
                   <object class="AdwActionRow">
                     <property name="title" translatable="yes">Power Usage</property>
+                    <property name="subtitle">Current GPU power consumption</property>
                     <child>
                       <object class="GtkLabel" id="gpu_power_value">
                         <property name="label">-</property>

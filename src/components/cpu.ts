@@ -5,6 +5,9 @@ import { UtilsService } from '../services/utils-service';
 export class CpuComponent {
   private container: Gtk.Box;
   private cpuChart!: Gtk.DrawingArea;
+  private cpuUsageBar!: Gtk.LevelBar;
+  private cpuUsageTitle!: Gtk.Label;
+  private cpuUsagePercent!: Gtk.Label;
   private cpuPerCoreChart!: Gtk.DrawingArea;
   private chartStack!: Gtk.Stack;
   private generalButton!: Gtk.ToggleButton;
@@ -59,6 +62,9 @@ export class CpuComponent {
 
     this.container = builder.get_object('cpu_container') as Gtk.Box;
     this.cpuChart = builder.get_object('cpu_chart') as Gtk.DrawingArea;
+    this.cpuUsageBar = builder.get_object('cpu_usage_bar') as Gtk.LevelBar;
+    this.cpuUsageTitle = builder.get_object('cpu_usage_title') as Gtk.Label;
+    this.cpuUsagePercent = builder.get_object('cpu_usage_percent') as Gtk.Label;
     this.cpuPerCoreChart = builder.get_object('cpu_percore_chart') as Gtk.DrawingArea;
     this.chartStack = builder.get_object('chart_stack') as Gtk.Stack;
     this.generalButton = builder.get_object('general_button') as Gtk.ToggleButton;
@@ -238,6 +244,16 @@ export class CpuComponent {
       // Get current CPU usage
       const cpuUsage = this.getCpuUsage();
       this.cpuUsageValue.set_label(`${cpuUsage.toFixed(1)}%`);
+      // Update CPU usage bar and percent label
+      if (this.cpuUsageBar) {
+        this.cpuUsageBar.set_value(Math.min(1, Math.max(0, cpuUsage / 100)));
+      }
+      if (this.cpuUsageTitle) {
+        this.cpuUsageTitle.set_label('Actual Load');
+      }
+      if (this.cpuUsagePercent) {
+        this.cpuUsagePercent.set_label(`${cpuUsage.toFixed(1)}%`);
+      }
       
       // Update history
       this.usageHistory.push(cpuUsage);
