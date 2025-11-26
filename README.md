@@ -1,6 +1,6 @@
-# Obision Status - System Status Monitor for GNOME
+# Obysion System - System Monitor for GNOME
 
-A modern GNOME system status and monitoring application built with TypeScript, GTK4, and Libadwaita. Provides a clean, responsive interface for viewing system information using an adaptive navigation split-view layout.
+A modern GNOME system monitoring application built with TypeScript, GTK4, and Libadwaita. Provides a clean, responsive interface for viewing comprehensive system information including CPU, GPU, memory, disk, network, temperatures, and system load using an adaptive navigation split-view layout.
 
 ## Features
 
@@ -15,12 +15,13 @@ A modern GNOME system status and monitoring application built with TypeScript, G
 ## Project Structure
 
 ```
-obision-status/
+obysion-system/
 ├── src/                          # Source code
 │   ├── main.ts                   # Main application file
-│   ├── components/               # UI components (extensible)
+│   ├── components/               # UI components (Resume, CPU, GPU, Memory, Disk, Network, etc.)
 │   ├── services/                 # Business logic
-│   │   └── utils-service.ts      # Utilities (system commands, etc.)
+│   │   ├── utils-service.ts      # Utilities (system commands, etc.)
+│   │   └── settings-service.ts   # GSettings integration for persistent configuration
 │   └── interfaces/               # TypeScript interfaces
 ├── scripts/                      # Build scripts
 │   └── build.js                  # Custom TypeScript to GJS converter
@@ -33,7 +34,7 @@ obision-status/
 │   ├── *.gschema.xml             # GSettings schema
 │   └── *.gresource.xml           # Resource bundle definition
 ├── bin/                          # Executable scripts
-│   └── obision-status.in         # Launcher script template
+│   └── obysion-system.in         # Launcher script template
 ├── builddir/                     # Generated files (created by build)
 │   ├── main.js                   # Compiled JavaScript (ready for GJS)
 │   ├── services/                 # Compiled services
@@ -88,7 +89,7 @@ sudo dnf install -y \
 ```bash
 # Clone the repository
 git clone https://github.com/nirlob/obision-status.git
-cd obision-status
+cd obysion-system
 
 # Install Node.js dependencies
 npm install
@@ -172,9 +173,9 @@ sudo npm run meson-uninstall
 
 ### After System Installation
 ```bash
-obision-status
+obysion-system
 ```
-Or launch from GNOME Applications menu: Look for "Obision Status"
+Or launch from GNOME Applications menu: Look for "Obysion System"
 
 ## TypeScript Development
 
@@ -205,11 +206,18 @@ The application uses declarative UI files (`data/ui/main.ui`) which are loaded a
 ## Application Features
 
 ### Main Features:
-1. **System Status Monitoring**: View system information and metrics
-2. **Adaptive Layout**: Navigation split-view that adapts to window size
-3. **Sidebar Navigation**: Collapsible sidebar for easy navigation on narrow screens
-4. **Custom Styling**: CSS-based theming with Adwaita integration
-5. **About Dialog**: Standard GNOME about dialog with application information
+1. **Comprehensive System Monitoring**: 
+   - Dashboard with circular charts (CPU, GPU, memory, disk, network)
+   - CPU and GPU temperature monitoring with color-coded displays
+   - System load visualization with progress bars (1/5/15 min averages)
+   - Top processes and system information
+2. **Persistent Settings**: 
+   - Window state (size, position, maximized) saved across sessions
+   - Configurable refresh interval (1-60 seconds)
+   - Preferences dialog for easy configuration
+3. **Adaptive Layout**: Navigation split-view that adapts to window size
+4. **Sidebar Navigation**: Collapsible sidebar for easy navigation on narrow screens
+5. **Custom Styling**: CSS-based theming with Adwaita integration
 6. **System Commands**: Execute system commands via UtilsService for retrieving system data
 
 ### Extensibility:
@@ -243,12 +251,35 @@ The project uses a **hybrid build system**:
 ### Application Pattern
 The application follows a single-class pattern with modular extension points:
 ```typescript
-class ObisionStatusApplication {
+class ObysionSystemApplication {
   private application: Adw.Application;
   constructor() {
     this.application = new Adw.Application({
-      application_id: 'com.obision.ObisionStatus',
+      application_id: 'com.obysion.ObysionSystem',
       flags: Gio.ApplicationFlags.DEFAULT_FLAGS,
+    });
+  }
+}
+```
+
+### Settings Service Pattern
+Settings use GSettings for persistence:
+```typescript
+class SettingsService {
+  private settings: Gio.Settings;
+  static _instance: SettingsService;
+  
+  private constructor() {
+    this.settings = new Gio.Settings({ schema_id: 'com.obysion.obysion-system' });
+  }
+  
+  public getRefreshInterval(): number {
+    return this.settings.get_int('refresh-interval');
+  }
+  
+  public connectRefreshIntervalChanged(callback: (interval: number) => void): number {
+    return this.settings.connect('changed::refresh-interval', () => {
+      callback(this.getRefreshInterval());
     });
   }
 }
@@ -307,7 +338,7 @@ GJS_DEBUG_OUTPUT=stderr ./builddir/main.js
 gjs --debugger builddir/main.js
 
 # Check system logs for installation issues
-journalctl -xe | grep obision-status
+journalctl -xe | grep obysion-system
 ```
 
 ## Contributing
