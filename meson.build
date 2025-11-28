@@ -72,6 +72,14 @@ install_data('data/icons/hicolor/64x64/apps/' + app_id + '.png',
   install_dir: datadir / 'icons' / 'hicolor' / '64x64' / 'apps'
 )
 
+install_data('data/icons/hicolor/128x128/apps/' + app_id + '.png',
+  install_dir: datadir / 'icons' / 'hicolor' / '128x128' / 'apps'
+)
+
+install_data('data/icons/hicolor/256x256/apps/' + app_id + '.png',
+  install_dir: datadir / 'icons' / 'hicolor' / '256x256' / 'apps'
+)
+
 # Create launcher script
 configure_file(
   input: 'bin/obysion-system.in',

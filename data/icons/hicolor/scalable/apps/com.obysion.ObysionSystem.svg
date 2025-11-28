@@ -1,129 +1,66 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="50 50 924 924">
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
   <defs>
-    <!-- Blue radial gradient fill -->
-    <radialGradient id="blueGrad" cx="50%" cy="45%" r="60%">
-      <stop offset="0%" stop-color="#3aa1ff" />
-      <stop offset="100%" stop-color="#0b4da8" />
-    </radialGradient>
-
-    <!-- Subtle brass rim gradient -->
-    <linearGradient id="brassGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#e2c471" />
-      <stop offset="50%" stop-color="#b68a2e" />
-      <stop offset="100%" stop-color="#8a6a23" />
+    <!-- Modern blue gradient (GNOME style) -->
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#62a0ea" />
+      <stop offset="100%" stop-color="#1c71d8" />
     </linearGradient>
-
-    <!-- Inner shadow for depth -->
-    <radialGradient id="innerShadow" cx="50%" cy="50%" r="50%">
-      <stop offset="75%" stop-color="rgba(0,0,0,0)" />
-      <stop offset="100%" stop-color="rgba(0,0,0,0.25)" />
-    </radialGradient>
-
-    <!-- Screw head gradient -->
-    <linearGradient id="screwGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#e2c471" />
-      <stop offset="100%" stop-color="#6b5321" />
-    </linearGradient>
+    
+    <!-- Subtle shadow -->
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
+      <feOffset dx="0" dy="2" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.3"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
   </defs>
 
-  <!-- Transparent background (nothing rendered) -->
-
-  <!-- Outer brass porthole ring -->
-  <g id="porthole">
-    <!-- Outer ring -->
-    <circle cx="512" cy="512" r="420" fill="url(#brassGrad)" />
-    <!-- Inner cutout to reveal blue area -->
-    <circle cx="512" cy="512" r="340" fill="none" stroke="rgba(0,0,0,0.35)" stroke-width="2" />
-    <!-- Inner bevel highlight -->
-    <circle cx="512" cy="512" r="380" fill="none" stroke="#e2c471" stroke-opacity="0.35" stroke-width="8" />
-    <!-- Edge shadow for depth -->
-    <circle cx="512" cy="512" r="420" fill="none" stroke="rgba(0,0,0,0.25)" stroke-width="14" />
-
-    <!-- Screws (8 evenly spaced) -->
-    <g id="screws" transform="translate(512,512)">
-      <!-- Functionally, we place at angles -->
-      <!-- Helper screw symbol -->
-      <g id="screw">
-        <circle cx="0" cy="-360" r="16" fill="url(#screwGrad)" stroke="#6b5321" stroke-width="2" />
-        <!-- Slot -->
-        <rect x="-10" y="-363" width="20" height="6" rx="2" fill="#6b5321" opacity="0.75" />
-      </g>
-      <use href="#screw" transform="rotate(45)" />
-      <use href="#screw" transform="rotate(90)" />
-      <use href="#screw" transform="rotate(135)" />
-      <use href="#screw" transform="rotate(180)" />
-      <use href="#screw" transform="rotate(225)" />
-      <use href="#screw" transform="rotate(270)" />
-      <use href="#screw" transform="rotate(315)" />
-    </g>
-
-    <!-- Left hinge -->
-    <g id="hinge" transform="translate(140,512)">
-      <!-- Back plate -->
-      <rect x="-10" y="-60" width="40" height="120" rx="6" fill="url(#brassGrad)" stroke="#6b5321" stroke-width="2" />
-      <!-- Knuckle -->
-      <rect x="30" y="-50" width="24" height="100" rx="6" fill="#b68a2e" stroke="#6b5321" stroke-width="2" />
-      <!-- Pin highlight -->
-      <rect x="40" y="-50" width="6" height="100" rx="3" fill="#e2c471" opacity="0.6" />
-      <!-- Mount screws -->
-      <circle cx="-0" cy="-40" r="8" fill="url(#screwGrad)" stroke="#6b5321" stroke-width="1.5" />
-      <circle cx="0" cy="40" r="8" fill="url(#screwGrad)" stroke="#6b5321" stroke-width="1.5" />
-    </g>
-
-    <!-- Right latch -->
-    <g id="latch" transform="translate(884,512)">
-      <!-- Base plate -->
-      <rect x="-30" y="-50" width="44" height="100" rx="6" fill="url(#brassGrad)" stroke="#6b5321" stroke-width="2" />
-      <!-- Pivot rod -->
-      <rect x="-6" y="-40" width="12" height="80" rx="6" fill="#b68a2e" stroke="#6b5321" stroke-width="1.5" />
-      <!-- Hook -->
-      <path d="M 8,-20 C 40,-20 40,20 8,20" fill="none" stroke="#8a6a23" stroke-width="8" stroke-linecap="round" />
-      <!-- Mount screws -->
-      <circle cx="-18" cy="-30" r="7" fill="url(#screwGrad)" stroke="#6b5321" stroke-width="1.5" />
-      <circle cx="-18" cy="30" r="7" fill="url(#screwGrad)" stroke="#6b5321" stroke-width="1.5" />
-    </g>
-  </g>
-
-  <!-- Blue interior circle -->
-  <g id="interior">
-    <circle cx="512" cy="512" r="330" fill="url(#blueGrad)" />
-    <!-- Soft inner vignette -->
-    <circle cx="512" cy="512" r="330" fill="url(#innerShadow)" />
-  </g>
-
-  <!-- White line chart icon, centered -->
-  <g id="chart-icon" transform="translate(512,512)">
-    <!-- Chart background rectangle with rounded corners -->
-    <rect x="-180" y="-140" width="360" height="280" rx="20" fill="#ffffff" opacity="0.15" />
+  <!-- Main rounded square background -->
+  <rect x="8" y="8" width="112" height="112" rx="24" ry="24" 
+        fill="url(#bgGradient)" filter="url(#shadow)"/>
+  
+  <!-- Subtle inner highlight -->
+  <rect x="12" y="12" width="104" height="52" rx="20" ry="20" 
+        fill="white" opacity="0.15"/>
+  
+  <!-- Chart container area -->
+  <g id="chart" transform="translate(64,64)">
+    <!-- Grid lines (subtle) -->
+    <line x1="-38" y1="-20" x2="38" y2="-20" stroke="white" stroke-width="1.5" opacity="0.3"/>
+    <line x1="-38" y1="-5" x2="38" y2="-5" stroke="white" stroke-width="1.5" opacity="0.3"/>
+    <line x1="-38" y1="10" x2="38" y2="10" stroke="white" stroke-width="1.5" opacity="0.3"/>
+    <line x1="-38" y1="25" x2="38" y2="25" stroke="white" stroke-width="1.5" opacity="0.3"/>
     
-    <!-- Grid lines (horizontal) -->
-    <line x1="-160" y1="-80" x2="160" y2="-80" stroke="#ffffff" stroke-width="3" opacity="0.3" />
-    <line x1="-160" y1="-20" x2="160" y2="-20" stroke="#ffffff" stroke-width="3" opacity="0.3" />
-    <line x1="-160" y1="40" x2="160" y2="40" stroke="#ffffff" stroke-width="3" opacity="0.3" />
-    <line x1="-160" y1="100" x2="160" y2="100" stroke="#ffffff" stroke-width="3" opacity="0.3" />
-    
-    <!-- Main chart line (system monitoring graph) -->
-    <path d="M -160,80 L -120,40 L -80,60 L -40,20 L 0,-40 L 40,-20 L 80,-60 L 120,-40 L 160,0"
+    <!-- Activity graph line 1 (CPU) -->
+    <path d="M -38,20 L -28,10 L -18,15 L -8,5 L 2,-10 L 12,-5 L 22,-15 L 32,-8 L 38,0"
           fill="none" 
-          stroke="#ffffff" 
-          stroke-width="10" 
+          stroke="white" 
+          stroke-width="3.5" 
           stroke-linecap="round" 
-          stroke-linejoin="round" />
+          stroke-linejoin="round"
+          opacity="0.95"/>
     
     <!-- Area fill under the line -->
-    <path d="M -160,80 L -120,40 L -80,60 L -40,20 L 0,-40 L 40,-20 L 80,-60 L 120,-40 L 160,0 L 160,120 L -160,120 Z"
-          fill="#ffffff" 
-          opacity="0.25" />
+    <path d="M -38,20 L -28,10 L -18,15 L -8,5 L 2,-10 L 12,-5 L 22,-15 L 32,-8 L 38,0 L 38,30 L -38,30 Z"
+          fill="white" 
+          opacity="0.2"/>
     
-    <!-- Data points on the line -->
-    <circle cx="-160" cy="80" r="8" fill="#ffffff" />
-    <circle cx="-120" cy="40" r="8" fill="#ffffff" />
-    <circle cx="-80" cy="60" r="8" fill="#ffffff" />
-    <circle cx="-40" cy="20" r="8" fill="#ffffff" />
-    <circle cx="0" cy="-40" r="8" fill="#ffffff" />
-    <circle cx="40" cy="-20" r="8" fill="#ffffff" />
-    <circle cx="80" cy="-60" r="8" fill="#ffffff" />
-    <circle cx="120" cy="-40" r="8" fill="#ffffff" />
-    <circle cx="160" cy="0" r="8" fill="#ffffff" />
+    <!-- Activity graph line 2 (Memory - different pattern) -->
+    <path d="M -38,25 L -28,18 L -18,22 L -8,12 L 2,8 L 12,15 L 22,5 L 32,10 L 38,18"
+          fill="none" 
+          stroke="white" 
+          stroke-width="2.5" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"
+          opacity="0.6"/>
   </g>
+  
+  <!-- Corner accent (system activity indicator dot) -->
+  <circle cx="100" cy="28" r="8" fill="#33d17a" opacity="0.9"/>
+  <circle cx="100" cy="28" r="5" fill="white" opacity="0.8"/>
 </svg>
