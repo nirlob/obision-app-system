@@ -32,9 +32,7 @@ jobs:
             librsvg2-bin \
             debhelper \
             devscripts \
-            build-essential \
-            nodejs \
-            npm
+            build-essential
       
       - name: Install npm dependencies
         run: npm install
@@ -44,11 +42,6 @@ jobs:
       
       - name: Check build output
         run: |
-          echo "=== Node.js version ==="
-          node --version
-          npm --version
-          which node
-          which npm
           echo "=== Builddir contents ==="
           ls -lah builddir/
           echo "=== Debian directory ==="
@@ -57,8 +50,7 @@ jobs:
       - name: Build Debian package
         run: |
           echo "=== Building Debian package ==="
-          # Use -d flag to ignore dependency checks since we already have them installed
-          dpkg-buildpackage -us -uc -b -d
+          dpkg-buildpackage -us -uc -b
           echo "=== Checking parent directory ==="
           ls -lah ../ | grep obision
       
