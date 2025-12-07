@@ -40,8 +40,26 @@ jobs:
       - name: Build TypeScript
         run: npm run build
       
+      - name: Check build output
+        run: |
+          echo "=== Builddir contents ==="
+          ls -lah builddir/
+          echo "=== Debian directory ==="
+          ls -lah debian/
+      
       - name: Build Debian package
-        run: npm run deb-build
+        run: |
+          echo "=== Building Debian package ==="
+          dpkg-buildpackage -us -uc -b
+          echo "=== Checking parent directory ==="
+          ls -lah ../ | grep obision
+      
+      - name: Move .deb to builddir
+        run: |
+          mkdir -p builddir
+          mv ../obision-system_*.deb builddir/obision-system.deb
+          mv ../obision-system_*.buildinfo builddir/ 2>/dev/null || true
+          mv ../obision-system_*.changes builddir/ 2>/dev/null || true
       
       - name: Verify .deb file
         run: |
@@ -50,6 +68,7 @@ jobs:
             echo "Error: .deb file not found!"
             exit 1
           fi
+          echo "✅ .deb file created successfully"
       
       - name: Get version from tag
         id: get_version
