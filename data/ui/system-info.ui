@@ -7,6 +7,34 @@
     <property name="orientation">vertical</property>
     <property name="spacing">0</property>
     <child>
+      <object class="GtkBox" id="toolbar_box">
+        <property name="orientation">horizontal</property>
+        <property name="spacing">6</property>
+        <property name="margin-start">12</property>
+        <property name="margin-end">0</property>
+        <property name="margin-top">6</property>
+        <property name="margin-bottom">6</property>
+        <child>
+          <object class="GtkBox">
+            <property name="hexpand">true</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="authenticate_button">
+            <property name="label">Authenticate</property>
+            <property name="tooltip-text">Login as root for more information</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="expand_collapse_button">
+            <property name="icon-name">view-sort-ascending-symbolic</property>
+            <property name="tooltip-text">Expand/Collapse all categories</property>
+            <property name="margin-end">0</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
       <object class="GtkScrolledWindow" id="system_info_scrolled">
         <property name="vexpand">true</property>
         <property name="hexpand">true</property>
