@@ -10,6 +10,7 @@
         <property name="margin-top">12</property>
         <property name="column-homogeneous">true</property>
         
+        <!-- Row 0: CPU, GPU, Memory -->
         <!-- CPU Box - Row 0, Column 0 -->
         <child>
           <object class="GtkBox">
@@ -163,6 +164,7 @@
           </object>
         </child>
         
+        <!-- Row 1: Disk, Network, Temperature -->
         <!-- Disk Box - Row 1, Column 0 -->
         <child>
           <object class="GtkBox">
@@ -265,9 +267,117 @@
           </object>
         </child>
         
-        <!-- CPU Temperature Box - Row 2, Column 0 -->
+        <!-- Temperature Box (CPU & GPU) - Row 1, Column 2 -->
         <child>
           <object class="GtkBox">
+            <property name="orientation">vertical</property>
+            <property name="spacing">6</property>
+            <property name="hexpand">true</property>
+            <style>
+              <class name="card"/>
+            </style>
+            <layout>
+              <property name="column">2</property>
+              <property name="row">1</property>
+            </layout>
+            <child>
+              <object class="GtkBox">
+                <property name="orientation">vertical</property>
+                <property name="spacing">6</property>
+                <property name="margin-start">12</property>
+                <property name="margin-end">12</property>
+                <property name="margin-top">12</property>
+                <property name="margin-bottom">12</property>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label">Temperature</property>
+                    <property name="halign">center</property>
+                    <style>
+                      <class name="title-4"/>
+                    </style>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="orientation">horizontal</property>
+                    <property name="spacing">24</property>
+                    <property name="halign">center</property>
+                    <property name="homogeneous">true</property>
+                    <!-- CPU Temperature -->
+                    <child>
+                      <object class="GtkBox">
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">6</property>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="label">CPU</property>
+                            <property name="halign">center</property>
+                            <style>
+                              <class name="dim-label"/>
+                            </style>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkDrawingArea" id="cpu_temp_chart">
+                            <property name="width-request">100</property>
+                            <property name="height-request">100</property>
+                            <property name="halign">center</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="cpu_temp_value">
+                            <property name="label">--</property>
+                            <property name="halign">center</property>
+                            <style>
+                              <class name="title-3"/>
+                            </style>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <!-- GPU Temperature -->
+                    <child>
+                      <object class="GtkBox">
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">6</property>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="label">GPU</property>
+                            <property name="halign">center</property>
+                            <style>
+                              <class name="dim-label"/>
+                            </style>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkDrawingArea" id="gpu_temp_chart">
+                            <property name="width-request">100</property>
+                            <property name="height-request">100</property>
+                            <property name="halign">center</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="gpu_temp_value">
+                            <property name="label">--</property>
+                            <property name="halign">center</property>
+                            <style>
+                              <class name="title-3"/>
+                            </style>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+        
+        <!-- Row 2: Battery, Top Processes, System Load -->
+        <!-- Battery Box - Row 2, Column 0 (only if battery exists) -->
+        <child>
+          <object class="GtkBox" id="battery_box">
             <property name="orientation">vertical</property>
             <property name="spacing">6</property>
             <property name="hexpand">true</property>
@@ -288,26 +398,41 @@
                 <property name="margin-bottom">12</property>
                 <child>
                   <object class="GtkLabel">
-                    <property name="label">CPU Temp</property>
+                    <property name="label">Battery</property>
                     <property name="halign">center</property>
                     <style>
                       <class name="title-4"/>
                     </style>
                   </object>
                 </child>
+                <!-- Historical chart -->
                 <child>
-                  <object class="GtkDrawingArea" id="cpu_temp_chart">
-                    <property name="width-request">120</property>
-                    <property name="height-request">120</property>
+                  <object class="GtkDrawingArea" id="battery_history_chart">
+                    <property name="width-request">200</property>
+                    <property name="height-request">80</property>
                     <property name="halign">center</property>
+                    <property name="vexpand">true</property>
                   </object>
                 </child>
+                <!-- Percentage -->
                 <child>
-                  <object class="GtkLabel" id="cpu_temp_value">
+                  <object class="GtkLabel" id="battery_percentage">
                     <property name="label">--</property>
                     <property name="halign">center</property>
+                    <property name="margin-top">4</property>
                     <style>
-                      <class name="title-2"/>
+                      <class name="title-1"/>
+                    </style>
+                  </object>
+                </child>
+                <!-- Status and time -->
+                <child>
+                  <object class="GtkLabel" id="battery_status_time">
+                    <property name="label">--</property>
+                    <property name="halign">center</property>
+                    <property name="margin-bottom">8</property>
+                    <style>
+                      <class name="caption"/>
                     </style>
                   </object>
                 </child>
@@ -316,9 +441,9 @@
           </object>
         </child>
         
-        <!-- GPU Temperature Box - Row 2, Column 1 -->
+        <!-- Top Processes Box - Row 2, Column 1 -->
         <child>
-          <object class="GtkBox">
+          <object class="GtkBox" id="top_processes_box">
             <property name="orientation">vertical</property>
             <property name="spacing">6</property>
             <property name="hexpand">true</property>
@@ -339,7 +464,7 @@
                 <property name="margin-bottom">12</property>
                 <child>
                   <object class="GtkLabel">
-                    <property name="label">GPU Temp</property>
+                    <property name="label">Top Processes</property>
                     <property name="halign">center</property>
                     <style>
                       <class name="title-4"/>
@@ -347,19 +472,19 @@
                   </object>
                 </child>
                 <child>
-                  <object class="GtkDrawingArea" id="gpu_temp_chart">
-                    <property name="width-request">120</property>
-                    <property name="height-request">120</property>
-                    <property name="halign">center</property>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="gpu_temp_value">
-                    <property name="label">--</property>
-                    <property name="halign">center</property>
+                  <object class="GtkFrame">
+                    <property name="margin-top">6</property>
                     <style>
-                      <class name="title-2"/>
+                      <class name="view"/>
                     </style>
+                    <child>
+                      <object class="GtkListBox" id="top_processes_list">
+                        <property name="selection-mode">none</property>
+                        <style>
+                          <class name="boxed-list"/>
+                        </style>
+                      </object>
+                    </child>
                   </object>
                 </child>
               </object>
@@ -369,7 +494,7 @@
         
         <!-- System Load Box - Row 2, Column 2 -->
         <child>
-          <object class="GtkBox">
+          <object class="GtkBox" id="system_load_box">
             <property name="orientation">vertical</property>
             <property name="spacing">6</property>
             <property name="hexpand">true</property>
@@ -527,57 +652,6 @@
                             <property name="mode">continuous</property>
                           </object>
                         </child>
-                      </object>
-                    </child>
-                  </object>
-                </child>
-              </object>
-            </child>
-          </object>
-        </child>
-        
-        <!-- Top Processes Box - Row 1, Column 2 -->
-        <child>
-          <object class="GtkBox">
-            <property name="orientation">vertical</property>
-            <property name="spacing">6</property>
-            <property name="hexpand">true</property>
-            <style>
-              <class name="card"/>
-            </style>
-            <layout>
-              <property name="column">2</property>
-              <property name="row">1</property>
-            </layout>
-            <child>
-              <object class="GtkBox">
-                <property name="orientation">vertical</property>
-                <property name="spacing">6</property>
-                <property name="margin-start">12</property>
-                <property name="margin-end">12</property>
-                <property name="margin-top">12</property>
-                <property name="margin-bottom">12</property>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="label">Top Processes</property>
-                    <property name="halign">center</property>
-                    <style>
-                      <class name="title-4"/>
-                    </style>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkFrame">
-                    <property name="margin-top">6</property>
-                    <style>
-                      <class name="view"/>
-                    </style>
-                    <child>
-                      <object class="GtkListBox" id="top_processes_list">
-                        <property name="selection-mode">none</property>
-                        <style>
-                          <class name="boxed-list"/>
-                        </style>
                       </object>
                     </child>
                   </object>

@@ -3,6 +3,7 @@ import Adw from '@girs/adw-1';
 import { ResumeService } from '../services/resume-service';
 import { SystemData } from '../interfaces/resume';
 import { UtilsService } from '../services/utils-service';
+import { DataService } from '../services/data-service';
 
 export class ResumeComponent {
   private container: Gtk.Box;
@@ -20,6 +21,12 @@ export class ResumeComponent {
   private gpuTempChart!: Gtk.DrawingArea;
   private cpuTempLabel!: Gtk.Label;
   private gpuTempLabel!: Gtk.Label;
+  private batteryBox!: Gtk.Box;
+  private batteryPercentage!: Gtk.Label;
+  private batteryStatusTime!: Gtk.Label;
+  private batteryHistoryChart!: Gtk.DrawingArea;
+  private topProcessesBox!: Gtk.Box;
+  private systemLoadBox!: Gtk.Box;
   private load1minLabel!: Gtk.Label;
   private load5minLabel!: Gtk.Label;
   private load15minLabel!: Gtk.Label;
@@ -30,6 +37,7 @@ export class ResumeComponent {
   private systemInfoList!: Gtk.ListBox;
   private resumeService: ResumeService;
   private utils: UtilsService;
+  private dataService: DataService;
   private dataCallback!: (data: SystemData) => void;
   private cpuUsage: number = 0;
   private gpuUsage: number = 0;
@@ -39,10 +47,15 @@ export class ResumeComponent {
   private networkUploadSpeed: number = 0;
   private cpuTemp: number = 0;
   private gpuTemp: number = 0;
+  private hasBattery: boolean = false;
+  private batteryHourlyData: Map<number, number[]> = new Map();
 
   constructor() {
     this.resumeService = ResumeService.instance;
     this.utils = UtilsService.instance;
+    this.dataService = DataService.instance;
+    this.hasBattery = this.dataService.hasBattery();
+    
     const builder = Gtk.Builder.new();
     
     try {
@@ -75,6 +88,12 @@ export class ResumeComponent {
     this.gpuTempChart = builder.get_object('gpu_temp_chart') as Gtk.DrawingArea;
     this.cpuTempLabel = builder.get_object('cpu_temp_value') as Gtk.Label;
     this.gpuTempLabel = builder.get_object('gpu_temp_value') as Gtk.Label;
+    this.batteryBox = builder.get_object('battery_box') as Gtk.Box;
+    this.batteryPercentage = builder.get_object('battery_percentage') as Gtk.Label;
+    this.batteryStatusTime = builder.get_object('battery_status_time') as Gtk.Label;
+    this.batteryHistoryChart = builder.get_object('battery_history_chart') as Gtk.DrawingArea;
+    this.topProcessesBox = builder.get_object('top_processes_box') as Gtk.Box;
+    this.systemLoadBox = builder.get_object('system_load_box') as Gtk.Box;
     this.load1minLabel = builder.get_object('load_1min') as Gtk.Label;
     this.load5minLabel = builder.get_object('load_5min') as Gtk.Label;
     this.load15minLabel = builder.get_object('load_15min') as Gtk.Label;
@@ -83,6 +102,17 @@ export class ResumeComponent {
     this.load15minBar = builder.get_object('load_15min_bar') as Gtk.LevelBar;
     this.topProcessesList = builder.get_object('top_processes_list') as Gtk.ListBox;
     this.systemInfoList = builder.get_object('system_info_list') as Gtk.ListBox;
+    
+    // Setup battery history chart drawing function
+    if (this.hasBattery) {
+      this.batteryHistoryChart.set_draw_func((area, cr, width, height) => {
+        this.drawBatteryHistoryChart(cr, width, height);
+      });
+      this.loadBatteryHistoricalData();
+    }
+    
+    // Configure layout based on battery presence
+    this.configureBatteryLayout();
     
     // Setup drawing functions
     this.cpuChart.set_draw_func((area, cr, width, height) => {
@@ -118,6 +148,197 @@ export class ResumeComponent {
     this.resumeService.subscribeToUpdates(this.dataCallback);
   }
 
+  private loadBatteryHistoricalData(): void {
+    // Clear existing data
+    this.batteryHourlyData.clear();
+    
+    // Get battery history from DataService
+    const history = this.dataService.getBatteryHistory();
+    
+    if (history.length === 0) {
+      // If no historical data, create empty buckets for last 12 hours
+      const now = new Date();
+      for (let i = 11; i >= 0; i--) {
+        const hour = new Date(now.getTime() - i * 60 * 60 * 1000).getHours();
+        this.batteryHourlyData.set(hour, []);
+      }
+      return;
+    }
+    
+    // Group battery levels by hour
+    for (const entry of history) {
+      const date = new Date(entry.timestamp);
+      const hour = date.getHours();
+      
+      if (!this.batteryHourlyData.has(hour)) {
+        this.batteryHourlyData.set(hour, []);
+      }
+      this.batteryHourlyData.get(hour)!.push(entry.level);
+    }
+    
+    // Redraw chart
+    this.batteryHistoryChart.queue_draw();
+  }
+
+  private drawBatteryHistoryChart(cr: any, width: number, height: number): void {
+    const padding = 20;
+    const bottomPadding = 25;
+    const chartWidth = width - 2 * padding;
+    const chartHeight = height - padding - bottomPadding;
+    
+    // Clear background
+    cr.setSourceRGBA(0, 0, 0, 0);
+    cr.paint();
+    
+    // Draw grid lines
+    cr.setSourceRGBA(0.8, 0.8, 0.8, 0.2);
+    cr.setLineWidth(0.5);
+    
+    // Horizontal grid lines (0%, 50%, 100%)
+    for (let i = 0; i <= 2; i++) {
+      const y = padding + (chartHeight * i / 2);
+      cr.moveTo(padding, y);
+      cr.lineTo(width - padding, y);
+      cr.stroke();
+    }
+    
+    if (this.batteryHourlyData.size === 0) {
+      // No data message
+      cr.setSourceRGB(0.5, 0.5, 0.5);
+      cr.setFontSize(10);
+      const msg = 'No data';
+      const extents = cr.textExtents(msg);
+      cr.moveTo((width - extents.width) / 2, height / 2);
+      cr.showText(msg);
+      return;
+    }
+    
+    // Calculate bar width for 12 hours
+    const barCount = 12;
+    const barSpacing = 2;
+    const barWidth = (chartWidth - (barCount - 1) * barSpacing) / barCount;
+    
+    // Get hours in order (last 12 hours)
+    const currentHour = new Date().getHours();
+    const hours: number[] = [];
+    for (let i = 0; i < barCount; i++) {
+      const hour = (currentHour - barCount + 1 + i + 24) % 24;
+      hours.push(hour);
+    }
+    
+    // Draw bars
+    hours.forEach((hour, index) => {
+      const levels = this.batteryHourlyData.get(hour) || [];
+      if (levels.length === 0) {
+        // Draw empty bar
+        const x = padding + index * (barWidth + barSpacing);
+        cr.setSourceRGBA(0.7, 0.7, 0.7, 0.15);
+        cr.rectangle(x, height - bottomPadding - 3, barWidth, 3);
+        cr.fill();
+      } else {
+        // Calculate average level for this hour
+        const avgLevel = levels.reduce((sum, val) => sum + val, 0) / levels.length;
+        const barHeight = (avgLevel / 100) * chartHeight;
+        
+        const x = padding + index * (barWidth + barSpacing);
+        const y = height - bottomPadding - barHeight;
+        
+        // Color based on battery level
+        if (avgLevel > 50) {
+          cr.setSourceRGB(0.2, 0.8, 0.2); // Green
+        } else if (avgLevel > 20) {
+          cr.setSourceRGB(0.9, 0.7, 0.2); // Yellow/Orange
+        } else {
+          cr.setSourceRGB(0.9, 0.2, 0.2); // Red
+        }
+        
+        // Draw bar
+        cr.rectangle(x, y, barWidth, barHeight);
+        cr.fill();
+      }
+      
+      // Draw hour label (every 3 hours)
+      if (index % 3 === 0) {
+        cr.setSourceRGB(0.5, 0.5, 0.5);
+        cr.setFontSize(8);
+        const label = `${hour}h`;
+        const x = padding + index * (barWidth + barSpacing);
+        const extents = cr.textExtents(label);
+        cr.moveTo(x + (barWidth - extents.width) / 2, height - bottomPadding + 12);
+        cr.showText(label);
+      }
+    });
+  }
+
+  private configureBatteryLayout(): void {
+    if (!this.hasBattery) {
+      // Hide battery box
+      this.batteryBox.set_visible(false);
+      
+      // Get the grid layout manager
+      const grid = this.container.get_first_child();
+      if (grid) {
+        // Make top processes and system load span 2 columns (columns 0-1)
+        const topProcessesLayoutChild = this.topProcessesBox.get_parent();
+        if (topProcessesLayoutChild) {
+          (topProcessesLayoutChild as any).column = 0;
+          (topProcessesLayoutChild as any).column_span = 2;
+        }
+        
+        const systemLoadLayoutChild = this.systemLoadBox.get_parent();
+        if (systemLoadLayoutChild) {
+          (systemLoadLayoutChild as any).column = 2;
+          (systemLoadLayoutChild as any).column_span = 1;
+        }
+      }
+    } else {
+      // Update battery info
+      this.updateBatteryInfo();
+    }
+  }
+
+  private updateBatteryInfo(): void {
+    try {
+      const [upowerOut] = this.utils.executeCommand('upower', ['-i', '/org/freedesktop/UPower/devices/battery_BAT0']);
+      
+      let percentage = '--';
+      let state = '--';
+      let timeToEmpty = '--';
+      let timeToFull = '--';
+      
+      const lines = upowerOut.split('\n');
+      for (const line of lines) {
+        if (line.includes('percentage:')) {
+          percentage = line.split(':')[1].trim();
+        } else if (line.includes('state:')) {
+          state = line.split(':')[1].trim();
+        } else if (line.includes('time to empty:')) {
+          timeToEmpty = line.split(':')[1].trim();
+        } else if (line.includes('time to full:')) {
+          timeToFull = line.split(':')[1].trim();
+        }
+      }
+      
+      this.batteryPercentage.set_label(percentage);
+      
+      // Combine status and time in one label (capitalized)
+      let statusText = state;
+      if (state === 'discharging' && timeToEmpty !== 'unknown' && timeToEmpty !== '') {
+        statusText = `${this.utils.capitalizeWords(state)} - ${timeToEmpty} remaining`;
+      } else if (state === 'charging' && timeToFull !== 'unknown' && timeToFull !== '') {
+        statusText = `${this.utils.capitalizeWords(state)} - ${timeToFull} to full`;
+      } else if (state === 'fully-charged') {
+        statusText = 'Fully Charged';
+      } else {
+        statusText = this.utils.capitalizeWords(state);
+      }
+      
+      this.batteryStatusTime.set_label(statusText);
+    } catch (error) {
+      console.error('Error updating battery info:', error);
+    }
+  }
+
   private onDataUpdate(data: SystemData): void {
     // Update usage values
     this.cpuUsage = data.cpu.usage;
@@ -135,6 +356,13 @@ export class ResumeComponent {
     this.networkLabel.set_label(`↓ ${data.network.download}\n↑ ${data.network.upload}`);
     this.cpuTempLabel.set_label(data.cpuTemp >= 0 ? `${data.cpuTemp}°C` : 'N/A');
     this.gpuTempLabel.set_label(data.gpuTemp >= 0 ? `${data.gpuTemp}°C` : 'N/A');
+    
+    // Update battery info if present
+    if (this.hasBattery) {
+      this.updateBatteryInfo();
+      // Refresh battery history occasionally
+      this.loadBatteryHistoricalData();
+    }
     
     // Update system load
     this.load1minLabel.set_label(data.systemLoad.load1.toFixed(2));

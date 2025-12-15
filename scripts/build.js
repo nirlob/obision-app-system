@@ -270,7 +270,8 @@ if (fs.existsSync(resumeComponentFile)) {
     }
 
     resumeContent = cleanJSContent(resumeContent)
-        .replace(/utils_service_1\./g, '');
+        .replace(/utils_service_1\./g, '')
+        .replace(/data_service_1\./g, '');
     combinedContent += resumeContent + '\n';
 }
 
