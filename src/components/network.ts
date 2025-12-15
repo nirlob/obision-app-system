@@ -3,6 +3,8 @@ import Adw from '@girs/adw-1';
 import { UtilsService } from '../services/utils-service';
 import { NetworkService } from '../services/network-service';
 import { NetworkData, NetworkInterface } from '../interfaces/network';
+import { ProcessesService } from '../services/processes-service';
+import { TopProcessesList, ProcessInfo } from './atoms/top-processes-list';
 
 export class NetworkComponent {
   private container: Gtk.Box;
@@ -19,10 +21,13 @@ export class NetworkComponent {
   private uploadHistory: number[] = [];
   private readonly maxHistoryPoints = 60;
   private interfaceRows: Map<string, Adw.ExpanderRow> = new Map();
+  private processesService: ProcessesService;
+  private topProcessesList!: TopProcessesList;
 
   constructor() {
     this.utils = UtilsService.instance;
     this.networkService = NetworkService.instance;
+    this.processesService = ProcessesService.instance;
     const builder = Gtk.Builder.new();
     
     try {
@@ -47,6 +52,13 @@ export class NetworkComponent {
     this.networkUploadSpeed = builder.get_object('network_upload_speed') as Gtk.Label;
     this.networkTotalDownload = builder.get_object('network_total_download') as Gtk.Label;
     this.networkTotalUpload = builder.get_object('network_total_upload') as Gtk.Label;
+    
+    // Create and add TopProcessesList
+    this.topProcessesList = new TopProcessesList('cpu', 8);
+    const topProcessesContainer = builder.get_object('top_processes_container') as Gtk.Box;
+    if (topProcessesContainer) {
+      topProcessesContainer.append(this.topProcessesList.getWidget());
+    }
     
     // Initialize history with zeros
     for (let i = 0; i < this.maxHistoryPoints; i++) {
@@ -142,8 +154,25 @@ export class NetworkComponent {
       if (txLabel) txLabel.set_label(this.utils.formatBytes(iface.txBytes));
     }
     
+    // Update top processes
+    this.updateTopProcesses();
+    
     // Redraw chart
     this.networkChart.queue_draw();
+  }
+  
+  private updateTopProcesses(): void {
+    try {
+      const allProcesses = this.processesService['loadProcesses']();
+      const processInfoList: ProcessInfo[] = allProcesses.map(p => ({
+        name: p.command.split(' ')[0].split('/').pop() || p.command,
+        cpu: parseFloat(p.cpu) || 0,
+        memory: parseFloat(p.rss) || 0
+      }));
+      this.topProcessesList.updateProcesses(processInfoList);
+    } catch (error) {
+      console.error('Error updating top processes:', error);
+    }
   }
   
   private formatSpeed(bytesPerSecond: number): string {
@@ -344,5 +373,8 @@ export class NetworkComponent {
 
   public destroy(): void {
     this.networkService.unsubscribe(this.dataCallback);
+    if (this.topProcessesList) {
+      this.topProcessesList.destroy();
+    }
   }
 }

@@ -4,6 +4,7 @@ import { ResumeService } from '../services/resume-service';
 import { SystemData } from '../interfaces/resume';
 import { UtilsService } from '../services/utils-service';
 import { DataService } from '../services/data-service';
+import { TopProcessesList, ProcessInfo } from './atoms/top-processes-list';
 
 export class ResumeComponent {
   private container: Gtk.Box;
@@ -33,8 +34,9 @@ export class ResumeComponent {
   private load1minBar!: Gtk.LevelBar;
   private load5minBar!: Gtk.LevelBar;
   private load15minBar!: Gtk.LevelBar;
-  private topProcessesList!: Gtk.ListBox;
-  private systemInfoList!: Gtk.ListBox;
+  private topProcessesWidget!: TopProcessesList;
+  private systemInfoList!: Gtk.Box;
+  private systemInfoGroup!: Adw.PreferencesGroup;
   private resumeService: ResumeService;
   private utils: UtilsService;
   private dataService: DataService;
@@ -100,8 +102,17 @@ export class ResumeComponent {
     this.load1minBar = builder.get_object('load_1min_bar') as Gtk.LevelBar;
     this.load5minBar = builder.get_object('load_5min_bar') as Gtk.LevelBar;
     this.load15minBar = builder.get_object('load_15min_bar') as Gtk.LevelBar;
-    this.topProcessesList = builder.get_object('top_processes_list') as Gtk.ListBox;
-    this.systemInfoList = builder.get_object('system_info_list') as Gtk.ListBox;
+    this.topProcessesBox = builder.get_object('top_processes_box') as Gtk.Box;
+    this.systemInfoList = builder.get_object('system_info_list') as Gtk.Box;
+    
+    // Create AdwPreferencesGroup for system info
+    this.systemInfoGroup = new Adw.PreferencesGroup();
+    this.systemInfoList.append(this.systemInfoGroup);
+    
+    // Create and add TopProcessesList to the widget container
+    this.topProcessesWidget = new TopProcessesList('cpu', 5);
+    const topProcessesWidgetContainer = builder.get_object('top_processes_widget_container') as Gtk.Box;
+    topProcessesWidgetContainer.append(this.topProcessesWidget.getWidget());
     
     // Setup battery history chart drawing function
     if (this.hasBattery) {
@@ -373,57 +384,26 @@ export class ResumeComponent {
     this.load15minBar.set_value(data.systemLoad.load15);
     
     // Update top processes
-    let child = this.topProcessesList.get_first_child();
-    while (child) {
-      const next = child.get_next_sibling();
-      this.topProcessesList.remove(child);
-      child = next;
-    }
+    const processInfoList: ProcessInfo[] = data.topProcesses.map(p => ({
+      name: p.name,
+      cpu: p.cpu,
+      memory: p.memory
+    }));
+    this.topProcessesWidget.updateProcesses(processInfoList);
     
-    for (const process of data.topProcesses) {
-      const row = new Gtk.Box({
-        orientation: Gtk.Orientation.HORIZONTAL,
-        spacing: 8,
-        margin_start: 8,
-        margin_end: 8,
-        margin_top: 4,
-        margin_bottom: 4,
-      });
-      
-      const nameLabel = new Gtk.Label({
-        label: process.name,
-        halign: Gtk.Align.START,
-        hexpand: true,
-        ellipsize: 3,
-        max_width_chars: 20,
-      });
-      
-      const cpuLabel = new Gtk.Label({
-        label: `${process.cpu.toFixed(1)}%`,
-        halign: Gtk.Align.END,
-      });
-      
-      row.append(nameLabel);
-      row.append(cpuLabel);
-      this.topProcessesList.append(row);
-    }
+    // Update system info - recreate preferences group to clear rows
+    this.systemInfoList.remove(this.systemInfoGroup);
+    this.systemInfoGroup = new Adw.PreferencesGroup();
+    this.systemInfoList.append(this.systemInfoGroup);
     
-    // Update system info
-    child = this.systemInfoList.get_first_child();
-    while (child) {
-      const next = child.get_next_sibling();
-      this.systemInfoList.remove(child);
-      child = next;
-    }
-    
-    this.addSystemInfoRow('OS', data.systemInfo.os);
-    this.addSystemInfoRow('Kernel', data.systemInfo.kernel);
-    this.addSystemInfoRow('Uptime', data.systemInfo.uptime);
-    this.addSystemInfoRow('CPU', data.cpu.model);
-    this.addSystemInfoRow('Cores', `${data.cpu.cores}`);
-    this.addSystemInfoRow('GPU', data.gpu.name);
-    this.addSystemInfoRow('Memory', `${this.utils.formatBytes(data.memory.used)} / ${this.utils.formatBytes(data.memory.total)}`);
-    this.addSystemInfoRow('Disk', `${this.utils.formatBytes(data.disk.used)} / ${this.utils.formatBytes(data.disk.total)}`);
+    this.addSystemInfoRow('OS', data.systemInfo.os, 'Operating system and distribution');
+    this.addSystemInfoRow('Kernel', data.systemInfo.kernel, 'Linux kernel version');
+    this.addSystemInfoRow('Uptime', data.systemInfo.uptime, 'Time since last boot');
+    this.addSystemInfoRow('CPU', data.cpu.model, 'Processor model name');
+    this.addSystemInfoRow('Cores', `${data.cpu.cores}`, 'Number of CPU cores');
+    this.addSystemInfoRow('GPU', data.gpu.name, 'Graphics processing unit');
+    this.addSystemInfoRow('Memory', `${this.utils.formatBytes(data.memory.used)} / ${this.utils.formatBytes(data.memory.total)}`, 'RAM usage and total capacity');
+    this.addSystemInfoRow('Disk', `${this.utils.formatBytes(data.disk.used)} / ${this.utils.formatBytes(data.disk.total)}`, 'Storage usage and total capacity');
     
     // Redraw charts
     this.cpuChart.queue_draw();
@@ -435,31 +415,19 @@ export class ResumeComponent {
     this.gpuTempChart.queue_draw();
   }
   
-  private addSystemInfoRow(title: string, value: string): void {
-    const row = new Gtk.Box({
-      orientation: Gtk.Orientation.HORIZONTAL,
-      spacing: 8,
-      margin_start: 8,
-      margin_end: 8,
-      margin_top: 4,
-      margin_bottom: 4,
+  private addSystemInfoRow(title: string, value: string, subtitle: string = ''): void {
+    const row = new Adw.ActionRow({
+      title: title,
+      subtitle: subtitle,
     });
-    
-    const titleLabel = new Gtk.Label({
-      label: title,
-      halign: Gtk.Align.START,
-      hexpand: true,
-    });
-    titleLabel.add_css_class('dim-label');
     
     const valueLabel = new Gtk.Label({
       label: value,
-      halign: Gtk.Align.END,
     });
+    valueLabel.add_css_class('dim-label');
     
-    row.append(titleLabel);
-    row.append(valueLabel);
-    this.systemInfoList.append(row);
+    row.add_suffix(valueLabel);
+    this.systemInfoGroup.add(row);
   }
 
   private drawCircularChart(cr: any, width: number, height: number, percentage: number): void {
@@ -589,5 +557,8 @@ export class ResumeComponent {
 
   public destroy(): void {
     this.resumeService.unsubscribe(this.dataCallback);
+    if (this.topProcessesWidget) {
+      this.topProcessesWidget.destroy();
+    }
   }
 }

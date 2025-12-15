@@ -2,6 +2,8 @@ import Gtk from '@girs/gtk-4.0';
 import GLib from '@girs/glib-2.0';
 import { UtilsService } from '../services/utils-service';
 import { DataService } from '../services/data-service';
+import { ProcessesService } from '../services/processes-service';
+import { TopProcessesList, ProcessInfo } from './atoms/top-processes-list';
 
 export class BatteryComponent {
   private container: Gtk.Box;
@@ -22,12 +24,15 @@ export class BatteryComponent {
   private updateTimeoutId: number | null = null;
   private utils: UtilsService;
   private dataService: DataService;
+  private processesService: ProcessesService;
+  private topProcessesList!: TopProcessesList;
   private hourlyData: Map<number, number[]> = new Map(); // hour -> [levels]
   private readonly hoursToShow = 24;
 
   constructor() {
     this.utils = UtilsService.instance;
     this.dataService = DataService.instance;
+    this.processesService = ProcessesService.instance;
     const builder = Gtk.Builder.new();
     
     try {
@@ -64,6 +69,13 @@ export class BatteryComponent {
     this.batteryModelValue = builder.get_object('battery_model_value') as Gtk.Label;
     this.batteryTemperatureValue = builder.get_object('battery_temperature_value') as Gtk.Label;
     this.batteryTimeRemainingValue = builder.get_object('battery_time_remaining_value') as Gtk.Label;
+    
+    // Create and add TopProcessesList
+    this.topProcessesList = new TopProcessesList('cpu', 8);
+    const topProcessesContainer = builder.get_object('top_processes_container') as Gtk.Box;
+    if (topProcessesContainer) {
+      topProcessesContainer.append(this.topProcessesList.getWidget());
+    }
     
     // Load historical battery data
     this.loadHistoricalData();
@@ -115,8 +127,25 @@ export class BatteryComponent {
       this.hourlyData.get(hour)!.push(entry.level);
     }
     
+    // Update top processes
+    this.updateTopProcesses();
+    
     // Redraw chart
     this.batteryChart.queue_draw();
+  }
+  
+  private updateTopProcesses(): void {
+    try {
+      const allProcesses = this.processesService['loadProcesses']();
+      const processInfoList: ProcessInfo[] = allProcesses.map(p => ({
+        name: p.command.split(' ')[0].split('/').pop() || p.command,
+        cpu: parseFloat(p.cpu) || 0,
+        memory: parseFloat(p.rss) || 0
+      }));
+      this.topProcessesList.updateProcesses(processInfoList);
+    } catch (error) {
+      console.error('Error updating top processes:', error);
+    }
   }
 
   private loadBatteryInfo(): void {
@@ -395,6 +424,9 @@ export class BatteryComponent {
   public destroy(): void {
     if (this.updateTimeoutId !== null) {
       GLib.source_remove(this.updateTimeoutId);
+    }
+    if (this.topProcessesList) {
+      this.topProcessesList.destroy();
     }
   }
 }

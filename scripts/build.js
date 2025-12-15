@@ -60,6 +60,10 @@ function cleanJSContent(content) {
         .replace(/processes_service_1\.ProcessesService/g, 'ProcessesService')
         .replace(/logs_service_1\.LogsService/g, 'LogsService')
 
+        // Replace atom component references
+        .replace(/top_processes_list_1\.TopProcessesList/g, 'TopProcessesList')
+        .replace(/top_processes_list_1\./g, '')
+
         // Remove other artifacts
         .replace(/\s*void 0;\s*\n?/g, '')
         .replace(/^\s*\n/gm, '') // Remove empty lines
@@ -218,6 +222,25 @@ if (fs.existsSync(dataServiceFile)) {
     dataServiceContent = cleanJSContent(dataServiceContent);
 
     combinedContent += dataServiceContent + '\n';
+}
+
+// Add TopProcessesList atom component
+const topProcessesListFile = path.join(BUILD_DIR, 'components', 'atoms', 'top-processes-list.js');
+if (fs.existsSync(topProcessesListFile)) {
+    console.log('📋 Adding TopProcessesList atom...');
+    let topProcessesListContent = fs.readFileSync(topProcessesListFile, 'utf8');
+
+    // Clean up the content - find the class definition start
+    const classStartIndex = topProcessesListContent.indexOf('class TopProcessesList {');
+    if (classStartIndex !== -1) {
+        topProcessesListContent = topProcessesListContent.substring(classStartIndex);
+    }
+
+    // Clean up TypeScript/CommonJS artifacts using our function
+    topProcessesListContent = cleanJSContent(topProcessesListContent)
+        .replace(/utils_service_1\./g, '');
+
+    combinedContent += topProcessesListContent + '\n';
 }
 
 // Add InstallDialog component

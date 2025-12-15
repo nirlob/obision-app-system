@@ -231,17 +231,8 @@ export class SystemInfoComponent {
             category = 'system';
             break;
           case 'Packages':
-            title = 'Packages';
-            const packages = [];
-            if (result.dpkg > 0) packages.push(`${result.dpkg} (dpkg)`);
-            if (result.flatpakSystem > 0 || result.flatpakUser > 0) {
-              packages.push(`${result.flatpakSystem + result.flatpakUser} (flatpak)`);
-            }
-            if (result.snap > 0) packages.push(`${result.snap} (snap)`);
-            subtitle = packages.join(', ');
-            icon = 'package-x-generic-symbolic';
-            category = 'system';
-            break;
+            // Skip packages - shown in Software section instead
+            continue;
           case 'Shell':
             title = 'Shell';
             subtitle = result.version ? `${result.exeName} ${result.version}` : result.exeName;

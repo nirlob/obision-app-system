@@ -2,6 +2,8 @@ import Gtk from '@girs/gtk-4.0';
 import GLib from '@girs/glib-2.0';
 import { UtilsService } from '../services/utils-service';
 import { DataService } from '../services/data-service';
+import { ProcessesService } from '../services/processes-service';
+import { TopProcessesList, ProcessInfo } from './atoms/top-processes-list';
 
 export class CpuComponent {
   private container: Gtk.Box;
@@ -34,6 +36,8 @@ export class CpuComponent {
   private updateTimeoutId: number | null = null;
   private utils: UtilsService;
   private dataService: DataService;
+  private processesService: ProcessesService;
+  private topProcessesList!: TopProcessesList;
   private usageHistory: number[] = [];
   private perCoreUsage: number[] = [];
   private prevCoreIdle: number[] = [];
@@ -46,6 +50,7 @@ export class CpuComponent {
   constructor() {
     this.utils = UtilsService.instance;
     this.dataService = DataService.instance;
+    this.processesService = ProcessesService.instance;
     const builder = Gtk.Builder.new();
     
     try {
@@ -90,6 +95,13 @@ export class CpuComponent {
     this.cpuL3CacheValue = builder.get_object('cpu_l3_cache_value') as Gtk.Label;
     this.cpuVirtualizationValue = builder.get_object('cpu_virtualization_value') as Gtk.Label;
     this.cpuBogomipsValue = builder.get_object('cpu_bogomips_value') as Gtk.Label;
+    
+    // Create and add TopProcessesList
+    this.topProcessesList = new TopProcessesList('cpu', 8);
+    const topProcessesContainer = builder.get_object('top_processes_container') as Gtk.Box;
+    if (topProcessesContainer) {
+      topProcessesContainer.append(this.topProcessesList.getWidget());
+    }
     
     // Initialize history with zeros
     for (let i = 0; i < this.maxHistoryPoints; i++) {
@@ -239,11 +251,28 @@ export class CpuComponent {
         this.cpuFrequencyValue.set_label('N/A');
       }
       
+      // Update top processes
+      this.updateTopProcesses();
+      
       // Redraw charts
       this.cpuChart.queue_draw();
       this.cpuPerCoreChart.queue_draw();
     } catch (error) {
       console.error('Error updating CPU data:', error);
+    }
+  }
+  
+  private updateTopProcesses(): void {
+    try {
+      const allProcesses = this.processesService['loadProcesses']();
+      const processInfoList: ProcessInfo[] = allProcesses.map(p => ({
+        name: p.command.split(' ')[0].split('/').pop() || p.command,
+        cpu: parseFloat(p.cpu) || 0,
+        memory: parseFloat(p.rss) || 0
+      }));
+      this.topProcessesList.updateProcesses(processInfoList);
+    } catch (error) {
+      console.error('Error updating top processes:', error);
     }
   }
 
@@ -466,6 +495,9 @@ export class CpuComponent {
     if (this.updateTimeoutId !== null) {
       GLib.source_remove(this.updateTimeoutId);
       this.updateTimeoutId = null;
+    }
+    if (this.topProcessesList) {
+      this.topProcessesList.destroy();
     }
   }
 }

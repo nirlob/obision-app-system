@@ -51,51 +51,68 @@
             </child>
           </object>
         </child>
-        <!-- Chart Section -->
+        <!-- Chart Section with Top Processes -->
         <child>
-          <object class="GtkStack" id="chart_stack">
-            <property name="vexpand">false</property>
+          <object class="GtkBox">
+            <property name="orientation">horizontal</property>
+            <property name="spacing">12</property>
             <property name="hexpand">true</property>
             <child>
-              <object class="GtkStackPage">
-                <property name="name">overall</property>
-                <property name="title">General</property>
-                <property name="child">
-                  <object class="GtkFrame">
-                    <property name="vexpand">false</property>
-                    <property name="hexpand">true</property>
-                    <style>
-                      <class name="view"/>
-                    </style>
-                    <child>
-                      <object class="GtkDrawingArea" id="cpu_chart">
-                        <property name="height-request">200</property>
+              <object class="GtkStack" id="chart_stack">
+                <property name="vexpand">false</property>
+                <property name="hexpand">true</property>
+                <child>
+                  <object class="GtkStackPage">
+                    <property name="name">overall</property>
+                    <property name="title">General</property>
+                    <property name="child">
+                      <object class="GtkFrame">
+                        <property name="vexpand">false</property>
                         <property name="hexpand">true</property>
+                        <style>
+                          <class name="view"/>
+                        </style>
+                        <child>
+                          <object class="GtkDrawingArea" id="cpu_chart">
+                            <property name="height-request">200</property>
+                            <property name="hexpand">true</property>
+                          </object>
+                        </child>
                       </object>
-                    </child>
+                    </property>
                   </object>
-                </property>
+                </child>
+                <child>
+                  <object class="GtkStackPage">
+                    <property name="name">percore</property>
+                    <property name="title">Cores</property>
+                    <property name="child">
+                      <object class="GtkFrame">
+                        <property name="vexpand">false</property>
+                        <property name="hexpand">true</property>
+                        <style>
+                          <class name="view"/>
+                        </style>
+                        <child>
+                          <object class="GtkDrawingArea" id="cpu_percore_chart">
+                            <property name="height-request">200</property>
+                            <property name="hexpand">true</property>
+                          </object>
+                        </child>
+                      </object>
+                    </property>
+                  </object>
+                </child>
               </object>
             </child>
+            <!-- Top Processes List -->
             <child>
-              <object class="GtkStackPage">
-                <property name="name">percore</property>
-                <property name="title">Cores</property>
-                <property name="child">
-                  <object class="GtkFrame">
-                    <property name="vexpand">false</property>
-                    <property name="hexpand">true</property>
-                    <style>
-                      <class name="view"/>
-                    </style>
-                    <child>
-                      <object class="GtkDrawingArea" id="cpu_percore_chart">
-                        <property name="height-request">200</property>
-                        <property name="hexpand">true</property>
-                      </object>
-                    </child>
-                  </object>
-                </property>
+              <object class="GtkBox" id="top_processes_container">
+                <property name="orientation">vertical</property>
+                <property name="spacing">0</property>
+                <property name="vexpand">false</property>
+                <property name="hexpand">false</property>
+                <property name="width-request">250</property>
               </object>
             </child>
           </object>

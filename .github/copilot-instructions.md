@@ -13,15 +13,18 @@ A modern GNOME system monitoring application built with TypeScript, GTK4, and Li
 
 **Build concatenation order is critical** (`scripts/build.js`):
 ```javascript
-// Order: interfaces → services → components → main
+// Order: interfaces → services → atoms → components → main
 // 1. interfaces/*.js (TypeScript interfaces, stripped during transpilation)
 // 2. Services (in order):
 //    - settings-service.js, utils-service.js, resume-service.js
-//    - network-service.js, processes-service.js, logs-service.js
-// 3. Components (in order):
+//    - network-service.js, processes-service.js, logs-service.js, data-service.js
+// 3. Atom components (reusable widgets):
+//    - atoms/top-processes-list.js
+// 4. Main components (in order):
+//    - install-dialog.js (optional), application-info-dialog.js (optional)
 //    - resume.js, cpu.js, gpu.js, memory.js, disk.js, network.js
-//    - system-info.js, resources.js, processes.js, services.js, drivers.js, logs.js
-// 4. main.js (application entry point)
+//    - battery.js, system-info.js, resources.js, processes.js, services.js, drivers.js, logs.js
+// 5. main.js (application entry point)
 ```
 **Critical**: Order prevents undefined references in single-file output. When adding new modules:
 1. Place services before components that use them
@@ -95,6 +98,15 @@ export class UtilsService {
 ```
 Access: `const utils = UtilsService.instance;`
 
+**Key Services**:
+- **UtilsService**: System command execution wrapper using `Gio.Subprocess`
+- **SettingsService**: GSettings integration for persistent app configuration
+- **DataService**: Hardware data collection (CPU, GPU, memory, disk info via system commands)
+- **ResumeService**: Dashboard data aggregation and system overview
+- **NetworkService**: Network statistics and interface monitoring
+- **ProcessesService**: Process listing, filtering, and management
+- **LogsService**: System logs parsing (journalctl, syslog)
+
 ### Component Pattern
 Components in `src/components/` encapsulate UI logic with lifecycle management:
 ```typescript
@@ -124,18 +136,16 @@ export class ResumeComponent {
   public getWidget(): Gtk.Box { return this.container; }
   
   public destroy(): void {
-    if (this.updateTimeoutId !== null) {
-      GLib.source_remove(this.updateTimeoutId);
-    }
-  }
-}
-```
-Pattern: Load UI from Builder XML, reference widgets by ID, implement `getWidget()` and `destroy()` for lifecycle.
-
-### Navigation System
-`src/main.ts` implements navigation switching via `onNavigationItemSelected()`:
+    if (this.updateTimeoucustom button-based navigation via `onNavigationItemSelected()`:
 ```typescript
-private onNavigationItemSelected(row: Gtk.ListBoxRow, contentBox: Gtk.Box): void {
+private onNavigationItemSelected(index: number, contentBox: Gtk.Box, 
+                                 selectedButton: Gtk.ToggleButton, 
+                                 allButtons: Gtk.ToggleButton[], 
+                                 titleLabel: Gtk.Label): void {
+  // Update button toggle state
+  allButtons.forEach(button => button.set_active(false));
+  selectedButton.set_active(true);
+  
   // Clear current content
   let child = contentBox.get_first_child();
   while (child) {
@@ -144,23 +154,61 @@ private onNavigationItemSelected(row: Gtk.ListBoxRow, contentBox: Gtk.Box): void
     child = next;
   }
   
-  // Switch based on row index (maps to navigation_list rows in main.ui)
-  const index = row.get_index();
+  // Switch based on index (0-11)
   switch (index) {
     case 0: this.showResume(contentBox); break;        // Dashboard/Resume
-    case 1: this.showSystemInfo(contentBox); break;    // System Information
-    case 2: this.showProcesses(contentBox); break;     // Process Monitor
-    case 3: this.showServices(contentBox); break;      // Services Manager
-    case 4: this.showDrivers(contentBox); break;       // Hardware Drivers
-    case 5: this.showLogs(contentBox); break;          // System Logs
-    // Add new views here
+    case 1: this.showCpu(contentBox); break;           // CPU Monitor
+    case 2: this.showGpu(contentBox); break;           // GPU Monitor
+    case 3: this.showMemory(contentBox); break;        // Memory Monitor
+    case 4: this.showDisk(contentBox); break;          // Disk Monitor
+    case 5: this.showNetwork(contentBox); break;       // Network Monitor
+    case 6: this.showBattery(contentBox); break;       // Battery Monitor
+    case 7: this.showSystemInfo(contentBox); break;    // System Information
+    case 8: this.showProcesses(contentBox); break;     // Process Monitor
+    case 9: this.showServices(contentBox); break;      // Services Manager
+    case 10: this.showDrivers(contentBox); break;      // Hardware Drivers
+    case 11: this.showLogs(contentBox); break;         // System Logs
   }
 }
 ```
-**Pattern**: Each `showX()` method instantiates component class, calls `getWidget()`, adds to contentBox.
-
-To add new views:
-1. Add `<object class="GtkListBoxRow">` in `data/ui/main.ui` → `navigation_list` (order matters!)
+**Pattern**: Each `showX()` method instantiates component class, calls `getWidget()`, adds to contentBox. Navigation uses `Gtk.ToggleButton` widgets instead of `GtkListBoxRow` for custom styling and state management
+   **Create component**: `src/components/my-view.ts` with `constructor()`, `getWidget()`, `destroy()`
+2. **Create UI file**: `data/ui/my-view.ui` with root container having unique ID
+3. **Add navigation button**: In `data/ui/main.ui`, add `<object class="GtkToggleButton">` to sidebar (order determines index)
+   ```xml
+   <child>
+     <object class="GtkToggleButton" id="menu_button_12">
+       <property name="child">
+         <object class="GtkBox">
+           <property name="spacing">12</property>
+           <child>
+             <object class="GtkImage">
+               <property name="icon-name">my-icon-symbolic</property>
+             </object>
+           </child>
+           <child>
+             <object class="GtkLabel">
+               <property name="label">My View</property>
+             </object>
+           </child>
+         </object>
+       </property>
+     </object>
+   </child>
+   ```
+4. **Import in main**: Add `import { MyViewComponent } from './components/my-view';` to `src/main.ts`
+5. **Wire navigation**: In `createMainWindow()`, get button reference and connect to `onNavigationItemSelected()`
+6. **Add switch case**: In `onNavigationItemSelected()`, add `case 12: this.showMyView(contentBox); break;`
+7. **Create show method**: `private showMyView(contentBox: Gtk.Box): void { /* instantiate & append */ }`
+8. **Upddata-service.ts             # Hardware data collection (CPU, GPU, memory, disk)
+│   ├── resume-service.ts           # Resume/dashboard data aggregation
+│   ├── network-service.ts          # Network statistics and monitoring
+│   ├── processes-service.ts        # Process information and management
+│   └── logs-service.ts             # System logs parsing
+├── components/
+│   ├── resume.ts                   # Dashboard with CPU/memory charts (Gtk.DrawingArea)
+│   ├── cpu.ts, gpu.ts, memory.ts, disk.ts, network.ts  # Resource-specific views
+│   ├── battery.ts                  # Battery status and history monitoring(order matters!)
 2. Create component: `src/components/my-view.ts` with `constructor()`, `getWidget()`, `destroy()`
 3. Create UI file: `data/ui/my-view.ui` with root object having unique ID
 4. Add case in `onNavigationItemSelected()` switch
@@ -216,16 +264,16 @@ builddir/                           # Generated output (git-ignored)
 └── data/                           # Copied resources
 ```
 
-## GJS/GTK4 Integration
+## GJS/GApplicationWindow`**: Main window with custom sidebar navigation
+  - Sidebar: `GtkBox` with `GtkToggleButton` widgets for navigation (12 views)
+  - Content: Scrollable `GtkBox` (`main_content`) dynamically populated on selection
+- **`AdwHeaderBar`**: Title bar with dynamic title label showing current view name
+- **`AdwAboutWindow`**: Standard GNOME about dialog (created in `showAboutDialog()`)
+- **`AdwPreferencesWindow`**: Settings dialog (created in `showPreferencesDialog()` with GSettings binding)
+- **`AdwToolbarView`**: Container combining header bar + scrollable content (used in components)
+- **Custom Navigation**: Uses `Gtk.ToggleButton` state management instead of traditional `GtkListBox`
 
-### Import Conversion
-TypeScript uses `@girs` NPM packages for type definitions, build script converts to GJS runtime imports:
-- **TypeScript source**: `import Gtk from "@girs/gtk-4.0"`
-- **Built output**: `const { Gtk } = imports.gi;`
-
-Build script header (`scripts/build.js` lines 67-79):
-```javascript
-const gjsHeader = `#!/usr/bin/env gjs
+**Widget naming convention**: Use descriptive IDs in UI files (e.g., `cpu_value`, `memory_chart`, `processes_list`, `menu_button_0
 
 imports.gi.versions.Gtk = '4.0';
 imports.gi.versions.Adw = '1';
@@ -290,35 +338,46 @@ this.cpuChart.queue_draw(); // Trigger redraw
 - **String cleaning**: Build script regex strips `exports.*`, `require()`, `__importDefault`, `_1.default.` references
 
 ## Development Workflow
-1. Edit TypeScript in `src/` or UI XML in `data/ui/`
-2. Run `npm run build` to compile (automatic on `npm start`)
-3. Test with `./builddir/main.js` or `npm start`
-4. Debug: `GJS_DEBUG_OUTPUT=stderr ./builddir/main.js` or `gjs --debugger builddir/main.js`
-5. System install: `npm run meson-install` (requires sudo)
-6. Post-install: `sudo update-desktop-database /usr/share/applications` + `sudo glib-compile-schemas /usr/share/glib-2.0/schemas/`
-
-## Meson Build System
-`meson.build` handles production installation (dual build system with npm):
-- Installs **compiled JS from `builddir/main.js`** (not TypeScript sources)
-- Creates launcher script in `/usr/bin/` from `bin/obision-system.in` template
-- Compiles GResources bundle from `data/com.obision.ObisionSystem.gresource.xml`
-- Installs desktop file (`data/com.obision.ObisionSystem.desktop.in`), icons, GSettings schema
-- Uses app ID `com.obision.ObisionSystem` throughout
-
-**Install paths**:
-- Binary: `/usr/bin/obision-system` → `/usr/share/com.obision.ObisionSystem/main.js`
-- UI files: `/usr/share/com.obision.ObisionSystem/ui/*.ui`
-- CSS: `/usr/share/com.obision.ObisionSystem/style.css`
-- Icons: `/usr/share/icons/hicolor/{scalable,48x48,64x64}/apps/com.obision.ObisionSystem.*`
-- Schema: `/usr/share/glib-2.0/schemas/com.obision.ObisionSystem.gschema.xml`
-
-## Common Tasks
-
-### Adding New Navigation View
-1. **Edit `data/ui/main.ui`**: Add `<object class="GtkListBoxRow">` to `navigation_list` (order determines index)
-   ```xml
-   <child>
-     <object class="GtkListBoxRow">
+1. EdCreate component**: `src/components/my-view.ts` with standard pattern:
+   ```typescript
+   export class MyViewComponent {
+     private container: Gtk.Box;
+     private updateTimeoutId: number | null = null;
+     
+     constructor() {
+       const builder = Gtk.Builder.new();
+       try {
+         builder.add_from_file('/usr/share/com.obision.ObisionSystem/ui/my-view.ui');
+       } catch (e) {
+         builder.add_from_file('data/ui/my-view.ui');
+       }
+       this.container = builder.get_object('my_view_container') as Gtk.Box;
+       
+       // Setup periodic updates if needed
+       this.updateTimeoutId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 5000, () => {
+         this.updateData();
+         return GLib.SOURCE_CONTINUE;
+       });
+     }
+     
+     public getWidget(): Gtk.Box { return this.container; }
+     
+     public destroy(): void {
+       if (this.updateTimeoutId !== null) GLib.source_remove(this.updateTimeoutId);
+     }
+   }
+   ```
+2. **Create UI file**: `data/ui/my-view.ui` with `AdwToolbarView` or `GtkBox` as root
+3. **Add navigation button**: In `data/ui/main.ui` sidebar, add `GtkToggleButton` with unique ID
+4. **Wire in main.ts**:
+   - Import: `import { MyViewComponent } from './components/my-view';`
+   - Get button: `const menuButton12 = builder.get_object('menu_button_12') as Gtk.ToggleButton;`
+   - Connect: `menuButton12.connect('clicked', () => this.onNavigationItemSelected(12, ...));`
+   - Add to `allMenuButtons` array
+   - Add switch case: `case 12: this.showMyView(contentBox); break;`
+   - Implement: `private showMyView(contentBox: Gtk.Box): void { /* ... */ }`
+5. **Update build script**: Add to `scripts/build.js` component concatenation section (before main.js)
+6. **Rebuild & test class="GtkListBoxRow">
        <property name="child">
          <object class="GtkBox">
            <property name="spacing">12</property>
@@ -383,6 +442,28 @@ try {
 }
 ```
 Commands use `Gio.Subprocess` with `STDOUT_PIPE | STDERR_PIPE` flags, blocking until completion.
+
+### Window State Persistence
+Window geometry is saved/restored via `SettingsService` (`src/main.ts` lines 117-139):
+```typescript
+// Load state on startup
+const settings = SettingsService.instance;
+const width = settings.getWindowWidth();
+const height = settings.getWindowHeight();
+const maximized = settings.getWindowMaximized();
+window.set_default_size(width, height);
+if (maximized) window.maximize();
+
+// Save state on close
+window.connect('close-request', () => {
+  const [currentWidth, currentHeight] = window.get_default_size();
+  settings.setWindowWidth(currentWidth);
+  settings.setWindowHeight(currentHeight);
+  settings.setWindowMaximized(window.is_maximized());
+  return false; // Allow window to close
+});
+```
+Settings keys defined in `data/com.obision.ObisionSystem.gschema.xml`.
 
 ### Periodic Updates
 Use `GLib.timeout_add` for polling (`src/components/resume.ts` lines 62-66):

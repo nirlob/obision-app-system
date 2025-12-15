@@ -2,6 +2,8 @@ import Gtk from "@girs/gtk-4.0";
 import Adw from "@girs/adw-1";
 import GLib from "@girs/glib-2.0";
 import { UtilsService } from "../services/utils-service";
+import { ProcessesService } from '../services/processes-service';
+import { TopProcessesList, ProcessInfo } from './atoms/top-processes-list';
 
 interface DiskStats {
     device: string;
@@ -38,9 +40,12 @@ export class DiskComponent {
     private filesystemRows: Map<string, Adw.ExpanderRow> = new Map();
     private totalBytesRead: number = 0;
     private totalBytesWritten: number = 0;
+    private processesService: ProcessesService;
+    private topProcessesList!: TopProcessesList;
 
     constructor() {
         this.utils = UtilsService.instance;
+        this.processesService = ProcessesService.instance;
 
         const builder = Gtk.Builder.new();
         try {
@@ -57,6 +62,13 @@ export class DiskComponent {
         this.totalWriteLabel = builder.get_object('total_write_label') as Gtk.Label;
         this.filesystemsGroup = builder.get_object('disk_filesystems_group') as Adw.PreferencesGroup;
         this.physicalDrivesGroup = builder.get_object('disk_physical_group') as Adw.PreferencesGroup;
+
+        // Create and add TopProcessesList
+        this.topProcessesList = new TopProcessesList('cpu', 8);
+        const topProcessesContainer = builder.get_object('top_processes_container') as Gtk.Box;
+        if (topProcessesContainer) {
+            topProcessesContainer.append(this.topProcessesList.getWidget());
+        }
 
         // Initialize history arrays
         for (let i = 0; i < 60; i++) {
@@ -329,8 +341,25 @@ export class DiskComponent {
         this.totalReadLabel.set_label(this.utils.formatBytes(this.totalBytesRead));
         this.totalWriteLabel.set_label(this.utils.formatBytes(this.totalBytesWritten));
 
+        // Update top processes
+        this.updateTopProcesses();
+        
         // Redraw chart
         this.diskChart.queue_draw();
+    }
+    
+    private updateTopProcesses(): void {
+        try {
+            const allProcesses = this.processesService['loadProcesses']();
+            const processInfoList: ProcessInfo[] = allProcesses.map(p => ({
+                name: p.command.split(' ')[0].split('/').pop() || p.command,
+                cpu: parseFloat(p.cpu) || 0,
+                memory: parseFloat(p.rss) || 0
+            }));
+            this.topProcessesList.updateProcesses(processInfoList);
+        } catch (error) {
+            console.error('Error updating top processes:', error);
+        }
     }
 
     private getDiskStats(): Map<string, DiskStats> {
