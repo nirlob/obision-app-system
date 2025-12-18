@@ -378,7 +378,7 @@ class ObisionStatusApplication {
       application_name: 'Obision System',
       application_icon: 'com.obision.ObisionAppSystem',
       developer_name: 'Jose Francisco Gonzalez',
-      version: '1.0.0',
+      version: '0.0.0',
       developers: ['Jose Francisco Gonzalez <jfgs1609@gmail.com>'],
       copyright: `© ${new Date().getFullYear()} Jose Francisco Gonzalez`,
       license_type: Gtk.License.GPL_3_0,
