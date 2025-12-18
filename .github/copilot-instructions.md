@@ -5,7 +5,7 @@ A modern GNOME system monitoring application built with TypeScript, GTK4, and Li
 
 **Current Version**: 1.6.0  
 **Runtime**: GJS (GNOME JavaScript), NOT Node.js  
-**Application ID**: `com.obision.ObisionSystem` (note: code still references `ObisionStatusApplication` class name)
+**Application ID**: `com.obision.ObisionAppSystem` (note: code still references `ObisionStatusApplication` class name)
 
 ## Critical Build System
 **NEVER use `tsc` directly.** Always use `npm run build` which:
@@ -47,7 +47,7 @@ A modern GNOME system monitoring application built with TypeScript, GTK4, and Li
 - **Direct run**: `GSETTINGS_SCHEMA_DIR=builddir/data ./builddir/main.js` (requires prior build)
 - **Production install**: `npm run meson-install` → Full build pipeline (npm build → meson setup → meson compile → sudo install)
 - **Uninstall**: `npm run meson-uninstall` → Removes system installation, cleans build dirs
-- **Debian package**: `npm run deb-build` → Creates .deb in `builddir/obision-system.deb`
+- **Debian package**: `npm run deb-build` → Creates .deb in `builddir/obision-app-system.deb`
 - **Debian install**: `npm run deb-install` → Installs .deb with dependency resolution
 - **Clean**: `npm run clean` → Removes `builddir/`, `mesonbuilddir/`, debian artifacts
 - **Deep clean**: `npm run meson-clean` → Additional GSettings compiled schema cleanup
@@ -62,7 +62,7 @@ class ObisionStatusApplication {
   
   constructor() {
     this.application = new Adw.Application({
-      application_id: 'com.obision.ObisionSystem',  // Note: ObisionSystem, not ObisionStatus
+      application_id: 'com.obision.ObisionAppSystem',  // Note: ObisionSystem, not ObisionStatus
       flags: Gio.ApplicationFlags.DEFAULT_FLAGS,
     });
     this.application.connect('activate', this.onActivate.bind(this));
@@ -229,7 +229,7 @@ All UI loading uses try/catch for installed vs. development paths:
 ```typescript
 const builder = Gtk.Builder.new();
 try {
-  builder.add_from_file('/usr/share/com.obision.ObisionSystem/ui/main.ui'); // Installed
+  builder.add_from_file('/usr/share/com.obision.ObisionAppSystem/ui/main.ui'); // Installed
 } catch (e) {
   builder.add_from_file('data/ui/main.ui'); // Development
 }
@@ -269,7 +269,7 @@ src/
 data/
 ├── ui/*.ui                         # GTK Builder XML files (one per component)
 ├── style.css                       # GTK4/Adwaita CSS customizations
-├── com.obision.ObisionSystem.gschema.xml  # GSettings schema
+├── com.obision.ObisionAppSystem.gschema.xml  # GSettings schema
 └── icons/                          # Icon assets
 
 scripts/build.js                    # Custom TypeScript → GJS compiler
@@ -319,7 +319,7 @@ Load styles early in `onActivate()` (`src/main.ts` lines 70-81):
 ```typescript
 const cssProvider = new Gtk.CssProvider();
 try {
-  cssProvider.load_from_path('/usr/share/com.obision.ObisionSystem/style.css');
+  cssProvider.load_from_path('/usr/share/com.obision.ObisionAppSystem/style.css');
 } catch (e) {
   cssProvider.load_from_path('data/style.css'); // Development fallback
 }
@@ -363,7 +363,7 @@ this.cpuChart.queue_draw(); // Trigger redraw
      constructor() {
        const builder = Gtk.Builder.new();
        try {
-         builder.add_from_file('/usr/share/com.obision.ObisionSystem/ui/my-view.ui');
+         builder.add_from_file('/usr/share/com.obision.ObisionAppSystem/ui/my-view.ui');
        } catch (e) {
          builder.add_from_file('data/ui/my-view.ui');
        }
@@ -454,7 +454,7 @@ window.connect('close-request', () => {
   return false; // Allow window to close
 });
 ```
-Settings keys defined in `data/com.obision.ObisionSystem.gschema.xml`.
+Settings keys defined in `data/com.obision.ObisionAppSystem.gschema.xml`.
 
 ### Periodic Updates
 Use `GLib.timeout_add` for polling (`src/components/resume.ts` lines 62-66):

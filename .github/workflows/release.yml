@@ -64,14 +64,14 @@ jobs:
       - name: Move .deb to builddir
         run: |
           mkdir -p builddir
-          mv ../obision-system_*.deb builddir/obision-system.deb
-          mv ../obision-system_*.buildinfo builddir/ 2>/dev/null || true
-          mv ../obision-system_*.changes builddir/ 2>/dev/null || true
+          mv ../obision-app-system_*.deb builddir/obision-app-system.deb
+          mv ../obision-app-system_*.buildinfo builddir/ 2>/dev/null || true
+          mv ../obision-app-system_*.changes builddir/ 2>/dev/null || true
       
       - name: Verify .deb file
         run: |
           ls -lh builddir/
-          if [ ! -f builddir/obision-system.deb ]; then
+          if [ ! -f builddir/obision-app-system.deb ]; then
             echo "Error: .deb file not found!"
             exit 1
           fi
@@ -84,7 +84,7 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: builddir/obision-system.deb
+          files: builddir/obision-app-system.deb
           generate_release_notes: true
           name: Release ${{ steps.get_version.outputs.VERSION }}
           draft: false

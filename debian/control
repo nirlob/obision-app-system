@@ -1,4 +1,4 @@
-Source: obision-system
+Source: obision-app-system
 Section: utils
 Priority: optional
 Maintainer: Jose Francisco Gonzalez <jfgs1609@gmail.com>
@@ -11,11 +11,11 @@ Build-Depends: debhelper-compat (= 13),
                nodejs,
                npm
 Standards-Version: 4.6.0
-Homepage: https://github.com/nirlob/obision-system
-Vcs-Git: https://github.com/nirlob/obision-system.git
-Vcs-Browser: https://github.com/nirlob/obision-system
+Homepage: https://github.com/nirlob/obision-app-system
+Vcs-Git: https://github.com/nirlob/obision-app-system.git
+Vcs-Browser: https://github.com/nirlob/obision-app-system
 
-Package: obision-system
+Package: obision-app-system
 Architecture: all
 Depends: ${misc:Depends},
          gjs,

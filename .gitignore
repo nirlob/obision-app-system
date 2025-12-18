@@ -53,7 +53,7 @@ logs/
 *.deb
 *.buildinfo
 *.changes
-debian/obision-system/
+debian/obision-app-system/
 debian/.debhelper/
 debian/files
 debian/debhelper-build-stamp

@@ -4,9 +4,9 @@
 
 ### Fixed
 - **Naming Correction**: Fixed spelling from "Obysion" to "Obision" throughout the project
-  - Updated application ID: `com.obysion.ObysionSystem` → `com.obision.ObisionSystem`
-  - Updated package name: `obysion-system` → `obision-system`
-  - Updated executable: `obysion-system` → `obision-system`
+  - Updated application ID: `com.obysion.ObysionSystem` → `com.obision.ObisionAppSystem`
+  - Updated package name: `obysion-system` → `obision-app-system`
+  - Updated executable: `obysion-system` → `obision-app-system`
   - Renamed all configuration files and icons to use correct spelling
   - Updated all source code references
 

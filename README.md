@@ -348,7 +348,7 @@ journalctl -xe | grep obysion-system
 # Build the debian package
 npm run deb-build
 
-# The .deb file will be created in builddir/obision-system.deb
+# The .deb file will be created in builddir/obision-app-system.deb
 ```
 
 ### Installing the Package
@@ -357,7 +357,7 @@ npm run deb-build
 npm run deb-install
 
 # Or manually
-sudo dpkg -i builddir/obision-system.deb
+sudo dpkg -i builddir/obision-app-system.deb
 sudo apt-get install -f  # Install dependencies if needed
 ```
 

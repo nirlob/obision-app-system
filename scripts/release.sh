@@ -37,7 +37,7 @@ AUTHOR_NAME="Jose Francisco Gonzalez"
 AUTHOR_EMAIL="jfgs1609@gmail.com"
 
 cat > debian/changelog.tmp << EOF
-obision-system ($NEW_VERSION) unstable; urgency=medium
+obision-app-system ($NEW_VERSION) unstable; urgency=medium
 
   * Release version $NEW_VERSION
 
@@ -68,4 +68,4 @@ echo ""
 echo "To build the .deb package locally, run:"
 echo "  npm run deb-build"
 echo ""
-echo "Check the repository at: https://github.com/nirlob/obision-system"
+echo "Check the repository at: https://github.com/nirlob/obision-app-system"

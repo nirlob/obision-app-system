@@ -1,4 +1,4 @@
-project('obision-system',
+project('obision-app-system',
   version: '1.6.0',
   meson_version: '>= 0.59.0',
 )
@@ -6,7 +6,7 @@ project('obision-system',
 gnome = import('gnome')
 
 # Application ID
-app_id = 'com.obision.ObisionSystem'
+app_id = 'com.obision.ObisionAppSystem'
 
 # Configuration
 conf = configuration_data()

@@ -23,7 +23,7 @@ class ObisionStatusApplication {
   constructor() {
     // Create the application
     this.application = new Adw.Application({
-      application_id: 'com.obision.ObisionSystem',
+      application_id: 'com.obision.ObisionAppSystem',
       flags: Gio.ApplicationFlags.DEFAULT_FLAGS,
     });
 
@@ -73,7 +73,7 @@ class ObisionStatusApplication {
     // Load CSS
     const cssProvider = new Gtk.CssProvider();
     try {
-      cssProvider.load_from_path('/usr/share/com.obision.ObisionSystem/style.css');
+      cssProvider.load_from_path('/usr/share/com.obision.ObisionAppSystem/style.css');
     } catch (e) {
       cssProvider.load_from_path('data/style.css');
     }
@@ -97,7 +97,7 @@ class ObisionStatusApplication {
     try {
       // Try installed path first
       try {
-        builder.add_from_file('/usr/share/com.obision.ObisionSystem/ui/main.ui');
+        builder.add_from_file('/usr/share/com.obision.ObisionAppSystem/ui/main.ui');
       } catch (e) {
         builder.add_from_file('data/ui/main.ui');
       }
@@ -389,7 +389,7 @@ class ObisionStatusApplication {
     
     try {
       try {
-        builder.add_from_file('/usr/share/com.obision.ObisionSystem/ui/preferences.ui');
+        builder.add_from_file('/usr/share/com.obision.ObisionAppSystem/ui/preferences.ui');
       } catch (e) {
         builder.add_from_file('data/ui/preferences.ui');
       }
