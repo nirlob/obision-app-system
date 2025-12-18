@@ -434,7 +434,7 @@
                             </child>
                             <child>
                               <object class="GtkLabel">
-                                <property name="label" translatable="yes">Logs</property>
+                                <property name="label" translatable="yes">User Logs</property>
                                 <property name="halign">start</property>
                                 <property name="hexpand">true</property>
                               </object>

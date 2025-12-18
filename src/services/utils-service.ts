@@ -46,4 +46,24 @@ export class UtilsService {
       word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
     ).join(' ');
   }
+
+  /**
+   * Authenticate as root using pkexec.
+   * @returns true if authentication succeeded, false if cancelled or failed
+   */
+  public authenticateAsRoot(): boolean {
+    try {
+      const [stdout, stderr] = this.executeCommand('pkexec', ['true']);
+      
+      // Check if authentication was cancelled or dismissed
+      if (stderr && (stderr.includes('dismissed') || stderr.includes('Error executing command'))) {
+        return false;
+      }
+      
+      // If no errors, authentication succeeded
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
 }

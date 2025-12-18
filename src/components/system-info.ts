@@ -89,19 +89,22 @@ export class SystemInfoComponent {
   
   private authenticate(): void {
     try {
-      // Try to execute a privileged command to verify authentication
+      // Try to authenticate using pkexec
       const [stdout, stderr] = this.utils.executeCommand('pkexec', ['true']);
       
-      if (stderr === '' || stdout !== '') {
+      if (!stderr || (!stderr.includes('dismissed') && !stderr.includes('Error executing command'))) {
         this.isAuthenticated = true;
         this.authenticateButton.set_sensitive(false);
         this.authenticateButton.set_label('Authenticated');
         
         // Refresh all information
         this.refreshAllInfo();
+      } else {
+        // Authentication cancelled or failed
+        console.log('Authentication cancelled by user');
       }
     } catch (e) {
-      console.error('Authentication failed:', e);
+      console.error('Authentication error:', e);
       const dialog = new Adw.MessageDialog({
         heading: 'Authentication Failed',
         body: 'Could not authenticate as root user.',

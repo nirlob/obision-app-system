@@ -67,6 +67,15 @@ export class SettingsService {
     this.settings.set_int('refresh-interval', interval);
   }
 
+  // Last selected menu
+  public getLastSelectedMenu(): number {
+    return this.settings.get_int('last-selected-menu');
+  }
+
+  public setLastSelectedMenu(index: number): void {
+    this.settings.set_int('last-selected-menu', index);
+  }
+
   // Connect to changes
   public connectRefreshIntervalChanged(callback: (interval: number) => void): number {
     return this.settings.connect('changed::refresh-interval', () => {

@@ -212,6 +212,12 @@ export class ServicesComponent {
         serviceName
       ]);
       
+      // Check if authentication was cancelled
+      if (stderr && (stderr.includes('dismissed') || stderr.includes('Error executing command'))) {
+        console.log('Service control cancelled: authentication required');
+        return;
+      }
+      
       console.log(`Service ${serviceName} ${action}ed successfully`);
       
       // Reload services after a short delay

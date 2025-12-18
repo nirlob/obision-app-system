@@ -16,6 +16,7 @@ export class LogsService {
     private userLogFilter: number = 0;
     private userPriority: number = 0;
     private userLines: number = 200;
+    private systemLogsAuthenticated: boolean = false;
 
     private constructor() {
         this.utils = UtilsService.instance;
@@ -70,8 +71,31 @@ export class LogsService {
         return this.isAutoRefreshEnabled;
     }
 
-    public loadSystemLogsWithSudo(): string {
-        return this.loadSystemLogsInternal(true);
+    public loadSystemLogsWithSudo(): { success: boolean; data: string; error?: string } {
+        const result = this.loadSystemLogsInternal(true);
+        return { success: true, data: result };
+    }
+    
+    public setSystemLogsAuthenticated(authenticated: boolean): void {
+        this.systemLogsAuthenticated = authenticated;
+    }
+    
+    public isSystemLogsAuthenticated(): boolean {
+        return this.systemLogsAuthenticated;
+    }
+
+    public requestSystemLogsWithElevation(): void {
+        // Try to load with sudo, but only update if successful
+        const result = this.loadSystemLogsInternal(true);
+        if (result && !result.includes('cancelled by user') && !result.includes('dismissed')) {
+            // Update all callbacks with elevated logs
+            const data: LogsData = {
+                systemLogs: result,
+                userLogs: this.loadUserLogs(),
+            };
+            this.dataCallbacks.forEach(callback => callback(data));
+        }
+        // If cancelled or failed, keep showing the normal logs (already loaded)
     }
 
     private startAutoRefresh(): void {
@@ -93,9 +117,13 @@ export class LogsService {
         }
     }
 
+    public requestUpdate(): void {
+        this.updateData();
+    }
+
     private updateData(): void {
         const data: LogsData = {
-            systemLogs: this.loadSystemLogsInternal(false),
+            systemLogs: this.systemLogsAuthenticated ? this.loadSystemLogsInternal(true) : '',
             userLogs: this.loadUserLogs(),
         };
 
@@ -104,7 +132,7 @@ export class LogsService {
 
     private loadSystemLogsInternal(useSudo: boolean): string {
         try {
-            let args: string[] = ['--since', '5 minutes ago', '--no-pager', '-q'];
+            let args: string[] = ['--no-pager', '-n', this.systemLines.toString(), '-o', 'short'];
 
             if (this.systemPriority > 0) {
                 const priorities = ['emerg', 'alert', 'crit', 'err', 'warning', 'notice', 'info', 'debug'];
@@ -145,8 +173,8 @@ export class LogsService {
             const finalArgs = useSudo ? ['journalctl', ...args] : args;
             const [stdout, stderr] = this.utils.executeCommand(command, finalArgs);
 
-            if (stderr && stderr.includes('dismissed')) {
-                return 'Authentication cancelled by user.';
+            if (useSudo && stderr && (stderr.includes('dismissed') || stderr.includes('Error executing command'))) {
+                return 'AUTH_CANCELLED';
             } else if (stderr && stderr.includes('insufficient permissions')) {
                 return `System logs require elevated permissions.\n\n` +
                        `To view system logs, you can:\n` +
@@ -156,11 +184,10 @@ export class LogsService {
                        `2. Or run journalctl manually in terminal:\n` +
                        `   journalctl -n 200 --no-pager\n\n` +
                        `Showing accessible logs instead:\n\n${stdout || 'No accessible logs found'}`;
-            } else if (stderr && stderr.trim() !== '') {
-                return `Error reading logs:\n${stderr}\n\nOutput:\n${stdout || 'No output'}`;
             }
 
-            return stdout || 'No logs found';
+            // Return logs directly without hints
+            return stdout && stdout.trim() ? stdout : 'No logs found';
         } catch (error) {
             return `Error loading logs: ${error}\n\nNote: journalctl may require additional permissions.`;
         }
@@ -168,7 +195,7 @@ export class LogsService {
 
     private loadUserLogs(): string {
         try {
-            let args: string[] = ['--since', '5 minutes ago', '--no-pager', '--user', '-q'];
+            let args: string[] = ['--no-pager', '--user', '-n', this.userLines.toString(), '-o', 'short'];
 
             if (this.userPriority > 0) {
                 const priorities = ['emerg', 'alert', 'crit', 'err', 'warning', 'notice', 'info', 'debug'];
@@ -194,11 +221,8 @@ export class LogsService {
 
             const [stdout, stderr] = this.utils.executeCommand('journalctl', args);
 
-            if (stderr && stderr.trim() !== '') {
-                return `Error reading logs:\n${stderr}`;
-            }
-
-            return stdout || 'No user logs found';
+            // Return logs directly without hints
+            return stdout && stdout.trim() ? stdout : 'No user logs found';
         } catch (error) {
             return `Error loading user logs: ${error}\n\nNote: User logs may not be available or require additional permissions.`;
         }

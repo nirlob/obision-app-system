@@ -31,5 +31,10 @@
       <summary>Refresh interval</summary>
       <description>The refresh interval in seconds for updating system information</description>
     </key>
+    <key name="last-selected-menu" type="i">
+      <default>0</default>
+      <summary>Last selected menu item</summary>
+      <description>The index of the last selected menu item in the sidebar</description>
+    </key>
   </schema>
 </schemalist>

@@ -15,7 +15,7 @@ import { BatteryComponent } from './components/battery';
 import { ProcessesComponent } from './components/processes';
 import { ServicesComponent } from './components/services';
 import { DriversComponent } from './components/drivers';
-import { LogsComponent } from './components/logs';
+import { UserLogsComponent } from './components/user-logs';
 
 class ObisionStatusApplication {
   private application: Adw.Application;
@@ -208,13 +208,36 @@ class ObisionStatusApplication {
       this.onNavigationItemSelected(11, mainContent, menuButton11, allMenuButtons, contentTitle);
     });
 
-    // Show first view by default
-    this.onNavigationItemSelected(0, mainContent, menuButton0, allMenuButtons, contentTitle);
+    // Restore last selected menu (settings already defined above)
+    const lastSelectedMenu = settings.getLastSelectedMenu();
+    
+    // Map of button indices to buttons and their actual view index
+    const menuMapping = [
+      { button: menuButton0, viewIndex: 0 },
+      { button: menuButton1, viewIndex: 1 },
+      { button: menuButton2, viewIndex: 2 },
+      { button: menuButton3, viewIndex: 3 },
+      { button: menuButton4, viewIndex: 4 },
+      { button: menuButton5, viewIndex: 5 },
+      { button: menuButton6, viewIndex: 6 },
+      { button: menuButton7, viewIndex: 8 },  // System Info
+      { button: menuButton8, viewIndex: 7 },  // Processes
+      { button: menuButton9, viewIndex: 9 },
+      { button: menuButton10, viewIndex: 10 },
+      { button: menuButton11, viewIndex: 11 },  // User Logs
+    ];
+    
+    // Find the menu item that matches the saved index
+    const selectedMenu = menuMapping.find(m => m.viewIndex === lastSelectedMenu) || menuMapping[0];
+    this.onNavigationItemSelected(selectedMenu.viewIndex, mainContent, selectedMenu.button, allMenuButtons, contentTitle);
 
     return window;
   }
 
   private onNavigationItemSelected(index: number, contentBox: Gtk.Box, selectedButton: Gtk.ToggleButton, allButtons: Gtk.ToggleButton[], titleLabel: Gtk.Label): void {
+    // Save selected menu index
+    SettingsService.instance.setLastSelectedMenu(index);
+    
     // Update button toggle state
     allButtons.forEach(button => {
       button.set_active(false);
@@ -339,7 +362,7 @@ class ObisionStatusApplication {
   }
 
   private showLogs(contentBox: Gtk.Box): void {
-    const component = new LogsComponent();
+    const component = new UserLogsComponent();
     contentBox.append(component.getWidget());
   }
 

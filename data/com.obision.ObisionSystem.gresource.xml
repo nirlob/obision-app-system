@@ -13,7 +13,7 @@
     <file>data/ui/processes.ui</file>
     <file>data/ui/services.ui</file>
     <file>data/ui/drivers.ui</file>
-    <file>data/ui/logs.ui</file>
+    <file>data/ui/user-logs.ui</file>
     <file>data/ui/preferences.ui</file>
     <file>data/style.css</file>
   </gresource>

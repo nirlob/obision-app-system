@@ -53,6 +53,7 @@ function cleanJSContent(content) {
 
         // Replace service references
         .replace(/utils_service_1\.UtilsService/g, 'UtilsService')
+        .replace(/auth_service_1\.AuthService/g, 'AuthService')
         .replace(/settings_service_1\.SettingsService/g, 'SettingsService')
         .replace(/data_service_1\.DataService/g, 'DataService')
         .replace(/resume_service_1\.ResumeService/g, 'ResumeService')
@@ -499,20 +500,20 @@ if (fs.existsSync(driversComponentFile)) {
     combinedContent += driversContent + '\n';
 }
 
-// Add Logs component
-const logsComponentFile = path.join(BUILD_DIR, 'components', 'logs.js');
-if (fs.existsSync(logsComponentFile)) {
-    console.log('📋 Adding LogsComponent...');
-    let logsContent = fs.readFileSync(logsComponentFile, 'utf8');
+// Add UserLogs component
+const userLogsComponentFile = path.join(BUILD_DIR, 'components', 'user-logs.js');
+if (fs.existsSync(userLogsComponentFile)) {
+    console.log('📋 Adding UserLogsComponent...');
+    let userLogsContent = fs.readFileSync(userLogsComponentFile, 'utf8');
 
-    const classStartIndex = logsContent.indexOf('class LogsComponent {');
+    const classStartIndex = userLogsContent.indexOf('class UserLogsComponent {');
     if (classStartIndex !== -1) {
-        logsContent = logsContent.substring(classStartIndex);
+        userLogsContent = userLogsContent.substring(classStartIndex);
     }
 
-    logsContent = cleanJSContent(logsContent)
+    userLogsContent = cleanJSContent(userLogsContent)
         .replace(/utils_service_1\./g, '');
-    combinedContent += logsContent + '\n';
+    combinedContent += userLogsContent + '\n';
 }
 
 // Add ApplicationsList component
@@ -564,7 +565,7 @@ if (fs.existsSync(mainJsFile)) {
         .replace(/processes_1\./g, '')
         .replace(/services_1\./g, '')
         .replace(/drivers_1\./g, '')
-        .replace(/logs_1\./g, '')
+        .replace(/user_logs_1\./g, '')
         .replace(/applications_list_js_1\.ApplicationsList/g, 'ApplicationsList')
         .replace(/applications_list_js_1\./g, '')
         .replace(/install_dialog_js_1\./g, '')

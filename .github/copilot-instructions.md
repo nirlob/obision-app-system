@@ -3,6 +3,10 @@
 ## Project Overview
 A modern GNOME system monitoring application built with TypeScript, GTK4, and Libadwaita. Displays comprehensive system information (CPU, GPU, memory, disk, network, temperatures, processes, services, drivers, logs) using a **custom single-pane navigation layout** with toggle-button-based sidebar. Uses a **hybrid build system**: TypeScript → GJS-compatible JavaScript via custom Node.js build script (`scripts/build.js`) that concatenates all modules into a single executable file.
 
+**Current Version**: 1.6.0  
+**Runtime**: GJS (GNOME JavaScript), NOT Node.js  
+**Application ID**: `com.obision.ObisionSystem` (note: code still references `ObisionStatusApplication` class name)
+
 ## Critical Build System
 **NEVER use `tsc` directly.** Always use `npm run build` which:
 1. Compiles TypeScript to CommonJS in `builddir/`
@@ -16,15 +20,16 @@ A modern GNOME system monitoring application built with TypeScript, GTK4, and Li
 // Order: interfaces → services → atoms → components → main
 // 1. interfaces/*.js (TypeScript interfaces, stripped during transpilation)
 // 2. Services (in order):
-//    - settings-service.js, utils-service.js, resume-service.js
-//    - network-service.js, processes-service.js, logs-service.js, data-service.js
+//    - settings-service.js, utils-service.js
+//    - resume-service.js, network-service.js, processes-service.js
+//    - logs-service.js, data-service.js
 // 3. Atom components (reusable widgets):
-//    - atoms/top-processes-list.js
+//    - atoms/info-row.js, atoms/top-processes-list.js
 // 4. Main components (in order):
 //    - install-dialog.js (optional), application-info-dialog.js (optional)
 //    - resume.js, cpu.js, gpu.js, memory.js, disk.js, network.js
 //    - system-info.js, battery.js, resources.js (optional)
-//    - processes.js, services.js, drivers.js, logs.js
+//    - processes.js, services.js, drivers.js, user-logs.js
 //    - applications-list.js (optional)
 // 5. main.js (application entry point)
 ```
@@ -32,7 +37,8 @@ A modern GNOME system monitoring application built with TypeScript, GTK4, and Li
 1. Place services before components that use them
 2. Place components before main.js
 3. Update `scripts/build.js` to include new file in correct sequence
-4. Ensure `cleanJSContent()` processes new file properly
+4. Ensure `cleanJSContent()` processes new file properly (strips `exports`, `require`, `__importDefault`, `void 0`)
+5. Add regex replacements for new class references (e.g., `my_service_1.MyService` → `MyService`)
 
 ## Run Commands
 - **Development**: `npm start` → Builds + runs with `GSETTINGS_SCHEMA_DIR=builddir/data ./builddir/main.js`
@@ -101,13 +107,13 @@ export class UtilsService {
 Access: `const utils = UtilsService.instance;`
 
 **Key Services**:
-- **UtilsService**: System command execution wrapper using `Gio.Subprocess`
-- **SettingsService**: GSettings integration for persistent app configuration
+- **UtilsService**: System command execution wrapper using `Gio.Subprocess`, utility functions (`formatBytes()`, `capitalizeWords()`, `authenticateAsRoot()` for pkexec)
+- **SettingsService**: GSettings integration for persistent app configuration (window geometry, theme preferences)
 - **DataService**: Hardware data collection (CPU, GPU, memory, disk info via system commands)
 - **ResumeService**: Dashboard data aggregation and system overview
 - **NetworkService**: Network statistics and interface monitoring
 - **ProcessesService**: Process listing, filtering, and management
-- **LogsService**: System logs parsing (journalctl, syslog)
+- **LogsService**: User logs parsing (journalctl for current user)
 
 ### Component Pattern
 Components in `src/components/` encapsulate UI logic with lifecycle management:
@@ -251,7 +257,7 @@ src/
 │   ├── processes.ts                # Process list with filtering
 │   ├── services.ts                 # System services management
 │   ├── drivers.ts                  # Hardware drivers information
-│   ├── logs.ts                     # System logs viewer
+│   ├── user-logs.ts                # User logs viewer
 │   ├── install-dialog.ts           # Package installation dialog (optional)
 │   ├── application-info-dialog.ts  # Application details dialog (optional)
 │   ├── applications-list.ts        # Applications list view (optional)
@@ -293,10 +299,11 @@ const { Pango } = imports.gi;
 ### UI Architecture
 Main window uses **custom single-pane layout** with sidebar navigation (`data/ui/main.ui`):
 - **`Adw.ApplicationWindow`**: Main window (`application_window`)
+  - Uses `AdwNavigationSplitView` with responsive `AdwBreakpoint` (collapses at max-width: 400sp)
   - Sidebar: `GtkBox` with 12 `GtkToggleButton` widgets (IDs: `menu_option_0` through `menu_option_11`)
   - Content: Scrollable `GtkBox` (`main_content`) dynamically populated on selection
   - Header: `AdwHeaderBar` with dynamic title label (`content_title`)
-- **Navigation Pattern**: Custom button-based navigation, not `AdwNavigationSplitView` or `GtkListBox`
+- **Navigation Pattern**: Custom toggle-button-based navigation with manual state management
 - **Battery Detection**: `menu_option_6` (Battery view) hidden if `DataService.hasBattery()` returns false
 
 ### Adwaita UI Components
@@ -463,9 +470,10 @@ if (this.updateTimeoutId !== null) {
 }
 ```
 
-### Troubleshooting Build Issues
+#### Troubleshooting Build Issues
 - **"Module not found"**: Run `npm install` to get `@girs` packages
 - **GJS runtime errors**: Check `builddir/main.js` for unconverted imports (look for `require`, `exports`)
 - **"Cannot find object ID"**: Verify UI file loaded correctly with try/catch, check Builder XML for `id` attribute
 - **Concatenation order errors**: Ensure `scripts/build.js` adds dependencies before dependents
 - **Meson install fails**: Run `npm run build` first to generate `builddir/main.js`
+- **GSettings schema errors**: Run `glib-compile-schemas data/` or use `npm run build` (includes schema compilation)
