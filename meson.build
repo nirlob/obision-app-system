@@ -82,8 +82,8 @@ install_data('data/icons/hicolor/256x256/apps/' + app_id + '.png',
 
 # Create launcher script
 configure_file(
-  input: 'bin/obision-system.in',
-  output: 'obision-system',
+  input: 'bin/obision-app-system.in',
+  output: 'obision-app-system',
   configuration: conf,
   install: true,
   install_dir: bindir,

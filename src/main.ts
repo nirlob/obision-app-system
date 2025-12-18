@@ -371,14 +371,14 @@ class ObisionStatusApplication {
       transient_for: parent,
       modal: true,
       application_name: 'Obision System',
-      application_icon: 'com.obision.ObisionSystem',
+      application_icon: 'com.obision.ObisionAppSystem',
       developer_name: 'Jose Francisco Gonzalez',
       version: '1.0.0',
       developers: ['Jose Francisco Gonzalez <jfgs1609@gmail.com>'],
       copyright: `© ${new Date().getFullYear()} Jose Francisco Gonzalez`,
       license_type: Gtk.License.GPL_3_0,
       website: 'https://obision.com',
-      issue_url: 'https://github.com/nirlob/obision-system/issues',
+      issue_url: 'https://github.com/nirlob/obision-app-system/issues',
     });
 
     aboutDialog.present();

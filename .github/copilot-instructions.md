@@ -62,7 +62,7 @@ class ObisionStatusApplication {
   
   constructor() {
     this.application = new Adw.Application({
-      application_id: 'com.obision.ObisionAppSystem',  // Note: ObisionSystem, not ObisionStatus
+      application_id: 'com.obision.ObisionAppSystem',  // Note: ObisionAppSystem, not ObisionStatus
       flags: Gio.ApplicationFlags.DEFAULT_FLAGS,
     });
     this.application.connect('activate', this.onActivate.bind(this));
