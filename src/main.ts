@@ -72,10 +72,15 @@ class ObisionStatusApplication {
 
     // Load CSS
     const cssProvider = new Gtk.CssProvider();
-    try {
-      cssProvider.load_from_path('/usr/share/com.obision.ObisionAppSystem/style.css');
-    } catch (e) {
-      cssProvider.load_from_path('data/style.css');
+    const installedPath = '/usr/share/com.obision.ObisionAppSystem/style.css';
+    const devPath = 'data/style.css';
+    
+    // Check if installed version exists
+    const installedFile = Gio.File.new_for_path(installedPath);
+    if (installedFile.query_exists(null)) {
+      cssProvider.load_from_path(installedPath);
+    } else {
+      cssProvider.load_from_path(devPath);
     }
 
     const display = Gdk.Display.get_default();
